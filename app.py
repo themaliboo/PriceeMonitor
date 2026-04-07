@@ -9,6 +9,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+from datetime import datetime, timedelta
 # ========== ИНИЦИАЛИЗАЦИЯ ==========
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
@@ -1728,68 +1729,65 @@ def api_reset_password():
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        email = request.form['email']
-
-        # Проверяем, существует ли пользователь
+        email = request.form.get('email')
+        
+        if not email:
+            return render_template_string(FORGOT_TEMPLATE, error="Введите email")
+        
         conn = db.conn
         cursor = conn.cursor()
-        cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+        cursor.execute('SELECT id, email FROM users WHERE email = ?', (email,))
         user = cursor.fetchone()
-
-        if user:
-            # Генерируем код восстановления
-            import random
-            reset_code = ''.join(random.choices('0123456789', k=6))
-
-            # Время истечения - через 15 минут
-            expires_at = datetime.now() + timedelta(minutes=15)
-
-            # Сохраняем код в базу (как текст, без форматирования)
-            cursor.execute('UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE id = ?',
-                           (reset_code, expires_at.strftime('%Y-%m-%d %H:%M:%S'), user[0]))
-            conn.commit()
-
-            # Отправляем код на почту
-            subject = "Восстановление пароля - PriceMonitor"
-            body = f"""
-            <html>
-            <body style="font-family: Arial, sans-serif;">
-                <h2>Восстановление пароля</h2>
-                <p>Ваш код для сброса пароля: <strong style="font-size: 24px; color: #667eea;">{reset_code}</strong></p>
-                <p>Введите этот код на странице восстановления пароля.</p>
-                <p>Код действителен 15 минут.</p>
-                <hr>
-                <p>Если вы не запрашивали восстановление пароля, проигнорируйте это письмо.</p>
-                <p>С уважением,<br>Команда PriceMonitor</p>
-            </body>
-            </html>
-            """
-
-            try:
-                msg = MIMEMultipart()
-                msg['From'] = SMTP_USER
-                msg['To'] = email
-                msg['Subject'] = subject
-                msg.attach(MIMEText(body, 'html', 'utf-8'))
-                server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-                server.starttls()
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.send_message(msg)
-                server.quit()
-
-                # Сохраняем email в сессию для следующего шага
-                session['reset_email'] = email
-
-                return render_template_string(RESET_CODE_TEMPLATE, email=email)
-
-            except Exception as e:
-                print(f"Ошибка отправки: {e}")
-                return 'Ошибка при отправке письма. Попробуйте позже.'
-        else:
-            return 'Пользователь с таким email не найден'
-
+        
+        if not user:
+            return render_template_string(FORGOT_TEMPLATE, error="Пользователь с таким email не найден")
+        
+        # Генерируем код
+        import random
+        reset_code = ''.join(random.choices('0123456789', k=6))
+        
+        # Сохраняем код в базу
+        expires_at = datetime.now() + timedelta(minutes=15)
+        cursor.execute('UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE id = ?', 
+                      (reset_code, expires_at, user[0]))
+        conn.commit()
+        
+        # Отправляем письмо
+        subject = "Восстановление пароля - PriceMonitor"
+        body = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif;">
+            <h2>Восстановление пароля</h2>
+            <p>Ваш код для сброса пароля: <strong style="font-size: 24px; color: #667eea;">{reset_code}</strong></p>
+            <p>Введите этот код на сайте для восстановления пароля.</p>
+            <p>Код действителен 15 минут.</p>
+            <hr>
+            <p>Если вы не запрашивали восстановление пароля, проигнорируйте это письмо.</p>
+        </body>
+        </html>
+        """
+        
+        try:
+            msg = MIMEMultipart()
+            msg['From'] = SMTP_USER
+            msg['To'] = email
+            msg['Subject'] = subject
+            msg.attach(MIMEText(body, 'html', 'utf-8'))
+            server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+            server.starttls()
+            server.login(SMTP_USER, SMTP_PASSWORD)
+            server.send_message(msg)
+            server.quit()
+            
+            # Переходим на страницу ввода кода
+            session['reset_email'] = email
+            return render_template_string(RESET_CODE_TEMPLATE, email=email)
+            
+        except Exception as e:
+            print(f"Ошибка отправки: {e}")
+            return render_template_string(FORGOT_TEMPLATE, error="Ошибка отправки письма. Попробуйте позже.")
+    
     return render_template_string(FORGOT_TEMPLATE)
-
 
 # Шаблон для ввода кода
 RESET_CODE_TEMPLATE = '''
@@ -1801,25 +1799,22 @@ RESET_CODE_TEMPLATE = '''
     .card{background:rgba(20,20,26,0.8);backdrop-filter:blur(10px);padding:40px;border-radius:16px;width:380px;border:1px solid rgba(42,42,53,0.5);text-align:center}
     input{width:100%;padding:12px;margin:10px 0;background:rgba(15,15,18,0.8);border:1px solid #2a2a35;border-radius:8px;color:#fff;text-align:center;font-size:20px;letter-spacing:5px}
     button{width:100%;padding:12px;background:#2a2a35;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-top:10px}
-    a{color:#a0a0b0;text-decoration:none}
-    .header-buttons{text-align:left;margin-bottom:20px}
-    .btn-small{padding:5px 12px;font-size:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;color:#a0a0b0;text-decoration:none}
-    .btn-small:hover{background:#2a2a35;color:#fff}
+    .error{color:#f0a0a0;margin-bottom:15px}
+    .link{margin-top:20px}
+    .link a{color:#a0a0b0;text-decoration:none}
 </style></head>
 <body>
 <div class="card">
-    <div class="header-buttons"><a href="/login" class="btn-small">← Назад</a></div>
     <h2>Введите код</h2>
     <p>Код отправлен на <strong>{{ email }}</strong></p>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
     <form method="post" action="/reset-password">
         <input type="text" name="code" placeholder="Код из письма" maxlength="6" autocomplete="off">
         <input type="password" name="new_password" placeholder="Новый пароль">
         <input type="password" name="confirm_password" placeholder="Подтвердите пароль">
         <button type="submit">Сбросить пароль</button>
     </form>
-    <div style="margin-top:20px">
-        <a href="/forgot-password">Отправить код повторно</a>
-    </div>
+    <div class="link"><a href="/forgot-password">Отправить код повторно</a></div>
 </div>
 </body>
 </html>
@@ -1834,20 +1829,23 @@ FORGOT_TEMPLATE = '''
     .card{background:rgba(20,20,26,0.8);backdrop-filter:blur(10px);padding:40px;border-radius:16px;width:350px;border:1px solid rgba(42,42,53,0.5)}
     input{width:100%;padding:12px;margin:10px 0;background:rgba(15,15,18,0.8);border:1px solid #2a2a35;border-radius:8px;color:#fff}
     button{width:100%;padding:12px;background:#2a2a35;color:#fff;border:none;border-radius:8px;cursor:pointer}
-    a{color:#a0a0b0;text-decoration:none}
+    .error{color:#f0a0a0;text-align:center;margin-bottom:15px}
+    .link{text-align:center;margin-top:20px}
+    .link a{color:#a0a0b0;text-decoration:none}
     .header-buttons{margin-bottom:20px}
-    .btn-small{padding:5px 12px;font-size:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;color:#a0a0b0;text-decoration:none}
+    .btn-small{padding:5px 12px;font-size:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;color:#a0a0b0;text-decoration:none;display:inline-block}
     .btn-small:hover{background:#2a2a35;color:#fff}
 </style></head>
 <body>
 <div class="card">
     <div class="header-buttons"><a href="/login" class="btn-small">← Назад</a></div>
     <h2 style="text-align:center;margin-bottom:30px">Восстановление пароля</h2>
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
     <form method="post">
         <input type="email" name="email" placeholder="Email" required>
         <button type="submit">Отправить код</button>
     </form>
-    <div style="text-align:center;margin-top:20px"><a href="/login">Вернуться ко входу</a></div>
+    <div class="link"><a href="/login">Вернуться ко входу</a></div>
 </div>
 </body>
 </html>
