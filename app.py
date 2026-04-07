@@ -9,7 +9,6 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
-from datetime import datetime, timedelta
 # ========== ИНИЦИАЛИЗАЦИЯ ==========
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
@@ -224,78 +223,6 @@ INDEX_TEMPLATE = '''
     <title>PriceMonitor - Мониторинг цен конкурентов</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0e; color: #e0e0e0; overflow-x: hidden; }
-
-        .dynamic-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; overflow: hidden; }
-        .particle { position: absolute; background: linear-gradient(135deg, rgba(100,100,150,0.4), rgba(80,80,120,0.2)); border-radius: 50%; animation: float 20s infinite linear; pointer-events: none; }
-        @keyframes float { 0% { transform: translateY(100vh) rotate(0deg); opacity: 0; } 10% { opacity: 0.6; } 90% { opacity: 0.6; } 100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; } }
-
-        .gradient-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 50%, rgba(30,30,60,0.4) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(60,40,80,0.3) 0%, transparent 60%); z-index: -1; }
-
-        /* Шапка на всю ширину */
-        .header {
-            padding: 20px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
-            background: rgba(10,10,14,0.5);
-            position: sticky;
-            top: 0;
-            width: 100%;
-            z-index: 100;
-        }
-        .header-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 24px;
-            position: relative;
-            z-index: 1;
-        }
-        .logo { font-size: 24px; font-weight: 600; background: linear-gradient(135deg, #ffffff, #a0a0c0); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .logo a { text-decoration: none; background: linear-gradient(135deg, #ffffff, #a0a0c0); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .nav a { color: #a0a0b0; text-decoration: none; margin-left: 28px; font-size: 14px; transition: color 0.2s; cursor: pointer; }
-        .nav a:hover { color: #ffffff; }
-
-        .hero { text-align: center; padding: 100px 0 80px; }
-        .hero h1 { font-size: 56px; font-weight: 700; margin-bottom: 24px; background: linear-gradient(135deg, #ffffff 0%, #9090b0 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .hero p { font-size: 18px; color: #a0a0b0; max-width: 600px; margin: 0 auto 32px; }
-        .hero-buttons { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-
-        .btn { display: inline-block; padding: 12px 28px; border-radius: 8px; text-decoration: none; font-weight: 500; font-size: 14px; transition: all 0.2s; cursor: pointer; }
-        .btn-primary { background: rgba(42,42,53,0.9); backdrop-filter: blur(5px); color: #ffffff; border: 1px solid rgba(58,58,72,0.5); }
-        .btn-primary:hover { background: rgba(58,58,72,0.9); transform: translateY(-2px); }
-        .btn-outline { background: transparent; color: #a0a0b0; border: 1px solid rgba(42,42,53,0.8); }
-        .btn-outline:hover { border-color: rgba(74,74,96,0.8); color: #ffffff; transform: translateY(-2px); }
-
-        .features { padding: 80px 0; border-top: 1px solid rgba(255,255,255,0.05); }
-        .features h2 { text-align: center; font-size: 32px; font-weight: 600; margin-bottom: 56px; background: linear-gradient(135deg, #ffffff, #9090b0); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
-        .feature { text-align: center; padding: 32px 24px; background: rgba(20,20,26,0.6); backdrop-filter: blur(5px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); transition: transform 0.3s, border-color 0.3s; }
-        .feature:hover { transform: translateY(-5px); border-color: rgba(100,100,150,0.3); }
-        .feature-icon { font-size: 40px; margin-bottom: 16px; }
-        .feature h3 { font-size: 18px; margin-bottom: 8px; font-weight: 600; color: #ffffff; }
-        .feature p { font-size: 14px; color: #8a8a9a; }
-
-        .pricing { padding: 8INDEX_TEMPLATE = '''
-
-INDEX_TEMPLATE = '''
-<!DOCTYPE html>
-<html>
-<head>
-    <title>PriceMonitor - Мониторинг цен конкурентов</title>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -386,7 +313,6 @@ INDEX_TEMPLATE = '''
             pointer-events: none;
         }
 
-        /* Детальные секции - всегда видимы */
         .detail-section {
             background: rgba(20,20,26,0.6);
             backdrop-filter: blur(5px);
@@ -395,6 +321,7 @@ INDEX_TEMPLATE = '''
             margin-bottom: 24px;
             border: 1px solid rgba(42,42,53,0.5);
             transition: transform 0.3s, border-color 0.3s;
+            user-select: none;
         }
         .detail-section:hover {
             transform: translateY(-4px);
@@ -408,53 +335,16 @@ INDEX_TEMPLATE = '''
             border-bottom: 1px solid rgba(255,255,255,0.1);
             padding-bottom: 16px;
         }
-        .detail-icon {
-            font-size: 32px;
-        }
-        .detail-header h2 {
-            margin: 0;
-            font-size: 24px;
-        }
-        .detail-content {
-            display: flex;
-            gap: 40px;
-            flex-wrap: wrap;
-        }
-        .detail-text {
-            flex: 1;
-            min-width: 250px;
-        }
-        .detail-text p {
-            color: #a0a0b0;
-            line-height: 1.6;
-            margin-bottom: 16px;
-        }
-        .detail-text ul {
-            list-style: none;
-            padding: 0;
-        }
-        .detail-text li {
-            padding: 8px 0;
-            padding-left: 24px;
-            position: relative;
-            color: #c0c0d0;
-        }
-        .detail-text li::before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #8cd4a0;
-        }
-        .detail-chart {
-            flex: 1;
-            min-width: 300px;
-        }
-        .chart-caption {
-            font-size: 12px;
-            color: #6a6a7a;
-            text-align: center;
-            margin-top: 8px;
-        }
+        .detail-icon { font-size: 32px; pointer-events: none; }
+        .detail-header h2 { margin: 0; font-size: 24px; pointer-events: none; }
+        .detail-content { display: flex; gap: 40px; flex-wrap: wrap; }
+        .detail-text { flex: 1; min-width: 250px; pointer-events: none; }
+        .detail-text p { color: #a0a0b0; line-height: 1.6; margin-bottom: 16px; }
+        .detail-text ul { list-style: none; padding: 0; }
+        .detail-text li { padding: 8px 0; padding-left: 24px; position: relative; color: #c0c0d0; }
+        .detail-text li::before { content: "✓"; position: absolute; left: 0; color: #8cd4a0; }
+        .detail-chart { flex: 1; min-width: 300px; pointer-events: auto; }
+        .chart-caption { font-size: 12px; color: #6a6a7a; text-align: center; margin-top: 8px; }
 
         .pricing { padding: 80px 0; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(15,15,18,0.5); backdrop-filter: blur(5px); }
         .pricing h2 { text-align: center; font-size: 32px; font-weight: 600; margin-bottom: 56px; background: linear-gradient(135deg, #ffffff, #9090b0); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -471,41 +361,15 @@ INDEX_TEMPLATE = '''
             cursor: pointer;
             user-select: none;
         }
-        .pricing-card:hover {
-            transform: translateY(-4px);
-            border-color: rgba(100,100,150,0.4);
-        }
-        .pricing-card h3 {
-            font-size: 22px;
-            margin-bottom: 16px;
-            color: #ffffff;
-            pointer-events: none;
-        }
-        .pricing-price {
-            font-size: 42px;
-            font-weight: 700;
-            color: #ffffff;
-            margin: 20px 0;
-            pointer-events: none;
-        }
-        .pricing-features {
-            list-style: none;
-            margin: 20px 0;
-            font-size: 13px;
-            color: #a0a0b0;
-            pointer-events: none;
-        }
-        .pricing-features li {
-            padding: 8px 0;
-            pointer-events: none;
-        }
-        .pricing-card .btn {
-            pointer-events: auto;
-        }
+        .pricing-card:hover { transform: translateY(-4px); border-color: rgba(100,100,150,0.4); }
+        .pricing-card h3 { font-size: 22px; margin-bottom: 16px; color: #ffffff; pointer-events: none; }
+        .pricing-price { font-size: 42px; font-weight: 700; color: #ffffff; margin: 20px 0; pointer-events: none; }
+        .pricing-features { list-style: none; margin: 20px 0; font-size: 13px; color: #a0a0b0; pointer-events: none; }
+        .pricing-features li { padding: 8px 0; pointer-events: none; }
+        .pricing-card .btn { pointer-events: auto; }
 
         .footer { padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 12px; color: #6a6a7a; }
 
-        /* Модальные окна */
         .modal {
             display: none;
             position: fixed;
@@ -599,6 +463,248 @@ INDEX_TEMPLATE = '''
             .nav a { margin-left: 16px; }
             .detail-content { flex-direction: column; }
         }
+                    /* АДАПТАЦИЯ ПОД ТЕЛЕФОН */
+        @media (max-width: 768px) {
+            /* Общие отступы */
+            .container {
+                padding: 0 16px;
+            }
+            
+            /* Шапка */
+            .header {
+                padding: 12px 0;
+            }
+            .header-content {
+                flex-direction: column;
+                gap: 12px;
+                text-align: center;
+            }
+            .nav a {
+                margin: 0 12px;
+                font-size: 13px;
+            }
+            
+            /* Герой секция */
+            .hero {
+                padding: 40px 0 30px;
+            }
+            .hero h1 {
+                font-size: 28px;
+            }
+            .hero p {
+                font-size: 14px;
+                padding: 0 10px;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+            }
+            .btn {
+                padding: 10px 20px;
+                font-size: 13px;
+                width: 200px;
+                text-align: center;
+            }
+            
+            /* Возможности сервиса */
+            .features {
+                padding: 40px 0;
+            }
+            .features h2 {
+                font-size: 24px;
+                margin-bottom: 30px;
+            }
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+            .feature {
+                padding: 20px 16px;
+            }
+            .feature-icon {
+                font-size: 32px;
+            }
+            .feature h3 {
+                font-size: 16px;
+            }
+            .feature p {
+                font-size: 12px;
+            }
+            
+            /* Детальные секции */
+            .detail-section {
+                padding: 20px;
+                margin-bottom: 16px;
+            }
+            .detail-header {
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+            .detail-icon {
+                font-size: 24px;
+            }
+            .detail-header h2 {
+                font-size: 18px;
+            }
+            .detail-content {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .detail-text p {
+                font-size: 13px;
+            }
+            .detail-text li {
+                font-size: 12px;
+                padding: 6px 0 6px 20px;
+            }
+            .detail-chart {
+                min-width: auto;
+            }
+            .chart-caption {
+                font-size: 10px;
+            }
+            
+            /* График */
+            #priceChart {
+                height: 180px !important;
+            }
+            
+            /* Тарифы */
+            .pricing {
+                padding: 40px 0;
+            }
+            .pricing h2 {
+                font-size: 24px;
+                margin-bottom: 30px;
+            }
+            .pricing-grid {
+                gap: 16px;
+            }
+            .pricing-card {
+                padding: 20px;
+                width: 100%;
+                max-width: 280px;
+            }
+            .pricing-card h3 {
+                font-size: 18px;
+            }
+            .pricing-price {
+                font-size: 32px;
+            }
+            .pricing-features li {
+                font-size: 12px;
+                padding: 5px 0;
+            }
+            
+            /* Модальные окна */
+            .modal-content {
+                width: 90%;
+                padding: 24px;
+                margin: 20px;
+            }
+            .modal-content h2 {
+                font-size: 20px;
+                margin-bottom: 20px;
+            }
+            .modal-content input {
+                padding: 10px;
+                font-size: 14px;
+            }
+            .modal-content button {
+                padding: 10px;
+                font-size: 14px;
+            }
+            .modal-content a {
+                font-size: 12px;
+            }
+            
+            /* Демо-режим */
+            #demoModal .modal-content {
+                width: 90%;
+                max-width: 400px;
+            }
+            #demoModal .modal-content h2 {
+                font-size: 20px;
+            }
+            .demo-product-card {
+                flex-direction: column;
+                text-align: center;
+                gap: 10px;
+            }
+            .demo-product-image {
+                width: 70px;
+                height: 70px;
+                margin: 0 auto;
+            }
+            .demo-product-title {
+                font-size: 14px;
+            }
+            .current-price {
+                font-size: 18px;
+            }
+            
+            /* Уведомления */
+            .toast {
+                left: 16px;
+                right: 16px;
+                min-width: auto;
+                padding: 12px 16px;
+            }
+            .toast-message {
+                font-size: 12px;
+            }
+            
+            /* Футер */
+            .footer {
+                padding: 30px 0;
+                font-size: 10px;
+            }
+        }
+        
+        /* Для очень маленьких экранов (iPhone SE и т.д.) */
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 24px;
+            }
+            .btn {
+                width: 180px;
+                padding: 8px 16px;
+            }
+            .feature-icon {
+                font-size: 28px;
+            }
+            .pricing-card {
+                padding: 16px;
+            }
+            .pricing-price {
+                font-size: 28px;
+            }
+            .modal-content {
+                padding: 20px;
+            }
+            .demo-product-image {
+                width: 60px;
+                height: 60px;
+            }
+        }
+        
+        /* Для планшетов */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            .pricing-grid {
+                gap: 20px;
+            }
+            .pricing-card {
+                width: 240px;
+            }
+            .detail-content {
+                gap: 30px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -653,7 +759,6 @@ INDEX_TEMPLATE = '''
             </div>
         </div>
 
-        <!-- Подробные секции (всегда видимы) -->
         <div id="monitoring-detail" class="detail-section">
             <div class="detail-header">
                 <div class="detail-icon">◈</div>
@@ -694,25 +799,17 @@ INDEX_TEMPLATE = '''
                 <div class="detail-chart">
                     <div style="background: #1a1a24; border-radius: 16px; padding: 20px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
-                            <div>
-                                <div style="color: #8a8a9a; font-size: 12px;">Цена конкурента</div>
-                                <div style="font-size: 24px; color: #f0a0a0;">94 990 ₽</div>
-                            </div>
+                            <div><div style="color: #8a8a9a; font-size: 12px;">Цена конкурента</div><div style="font-size: 24px; color: #f0a0a0;">94 990 ₽</div></div>
                             <div style="font-size: 24px;">→</div>
-                            <div>
-                                <div style="color: #8a8a9a; font-size: 12px;">Рекомендуемая</div>
-                                <div style="font-size: 28px; color: #8cd4a0;">89 990 ₽</div>
-                            </div>
+                            <div><div style="color: #8a8a9a; font-size: 12px;">Рекомендуемая</div><div style="font-size: 28px; color: #8cd4a0;">89 990 ₽</div></div>
                         </div>
-                        <div style="background: #2a2a4a; padding: 12px; border-radius: 8px; text-align: center;">
-                            💡 AI совет: Снизьте цену на 5%
-                        </div>
+                        <div style="background: #2a2a4a; padding: 12px; border-radius: 8px; text-align: center;">⚡ AI совет: Снизьте цену на 5%</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div id="telegram-detail" class="detail-section">
+                <div id="telegram-detail" class="detail-section">
             <div class="detail-header">
                 <div class="detail-icon">◎</div>
                 <h2>Telegram уведомления</h2>
@@ -730,7 +827,7 @@ INDEX_TEMPLATE = '''
                 <div class="detail-chart">
                     <div style="background: #1a1a24; border-radius: 16px; padding: 16px; max-width: 300px; margin: 0 auto;">
                         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
-                            <div style="width: 40px; height: 40px; background: #2a2a4a; border-radius: 50%; display: flex; align-items: center; justify-content: center;">🤖</div>
+                            <div style="width: 40px; height: 40px; background: #2a2a4a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px;">🤖</div>
                             <div><strong>PriceMonitor Bot</strong><br><span style="font-size: 11px; color: #8a8a9a;">только что</span></div>
                         </div>
                         <div style="background: #0f0f12; border-radius: 12px; padding: 12px;">
@@ -760,18 +857,9 @@ INDEX_TEMPLATE = '''
                 </div>
                 <div class="detail-chart">
                     <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
-                        <div style="background: #1a1a24; padding: 15px; border-radius: 12px; text-align: center; flex: 1;">
-                            <div style="font-size: 28px; color: #8cd4a0;">-15%</div>
-                            <div style="font-size: 11px; color: #8a8a9a;">Среднее снижение</div>
-                        </div>
-                        <div style="background: #1a1a24; padding: 15px; border-radius: 12px; text-align: center; flex: 1;">
-                            <div style="font-size: 28px; color: #8cd4a0;">24/7</div>
-                            <div style="font-size: 11px; color: #8a8a9a;">Мониторинг</div>
-                        </div>
-                        <div style="background: #1a1a24; padding: 15px; border-radius: 12px; text-align: center; flex: 1;">
-                            <div style="font-size: 28px; color: #8cd4a0;">30д</div>
-                            <div style="font-size: 11px; color: #8a8a9a;">История</div>
-                        </div>
+                        <div style="background: #1a1a24; padding: 15px; border-radius: 12px; text-align: center; flex: 1;"><div style="font-size: 28px; color: #8cd4a0;">-15%</div><div style="font-size: 11px; color: #8a8a9a;">Среднее снижение</div></div>
+                        <div style="background: #1a1a24; padding: 15px; border-radius: 12px; text-align: center; flex: 1;"><div style="font-size: 28px; color: #8cd4a0;">24/7</div><div style="font-size: 11px; color: #8a8a9a;">Мониторинг</div></div>
+                        <div style="background: #1a1a24; padding: 15px; border-radius: 12px; text-align: center; flex: 1;"><div style="font-size: 28px; color: #8cd4a0;">30д</div><div style="font-size: 11px; color: #8a8a9a;">История</div></div>
                     </div>
                 </div>
             </div>
@@ -783,30 +871,19 @@ INDEX_TEMPLATE = '''
                 <div class="pricing-card" onclick="openRegisterModal()">
                     <h3>Бесплатный</h3>
                     <div class="pricing-price">0 ₽</div>
-                    <ul class="pricing-features">
-                        <li>1 тестовый запрос</li>
-                        <li>Базовая аналитика</li>
-                    </ul>
+                    <ul class="pricing-features"><li>1 тестовый запрос</li><li>Базовая аналитика</li></ul>
                     <a onclick="event.stopPropagation(); openRegisterModal()" class="btn btn-outline">Начать</a>
                 </div>
                 <div class="pricing-card" onclick="openRegisterModal()">
                     <h3>Месячный</h3>
                     <div class="pricing-price">1 990 ₽</div>
-                    <ul class="pricing-features">
-                        <li>Неограниченные запросы</li>
-                        <li>Автопарсинг</li>
-                        <li>Telegram уведомления</li>
-                    </ul>
+                    <ul class="pricing-features"><li>Неограниченные запросы</li><li>Автопарсинг</li><li>Telegram уведомления</li></ul>
                     <a onclick="event.stopPropagation(); openRegisterModal()" class="btn btn-primary">Выбрать</a>
                 </div>
                 <div class="pricing-card" onclick="openRegisterModal()">
                     <h3>Годовой</h3>
                     <div class="pricing-price">14 990 ₽</div>
-                    <ul class="pricing-features">
-                        <li>Экономия 30%</li>
-                        <li>Все функции</li>
-                        <li>Приоритетная поддержка</li>
-                    </ul>
+                    <ul class="pricing-features"><li>Экономия 30%</li><li>Все функции</li><li>Приоритетная поддержка</li></ul>
                     <a onclick="event.stopPropagation(); openRegisterModal()" class="btn btn-primary">Выбрать</a>
                 </div>
             </div>
@@ -817,7 +894,6 @@ INDEX_TEMPLATE = '''
         </div>
     </div>
 
-    <!-- Модальное окно входа -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeLoginModal()">&times;</span>
@@ -832,7 +908,6 @@ INDEX_TEMPLATE = '''
         </div>
     </div>
 
-    <!-- Модальное окно регистрации -->
     <div id="registerModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeRegisterModal()">&times;</span>
@@ -849,7 +924,6 @@ INDEX_TEMPLATE = '''
         </div>
     </div>
 
-    <!-- Модальное окно восстановления пароля -->
     <div id="forgotModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeForgotModal()">&times;</span>
@@ -862,7 +936,6 @@ INDEX_TEMPLATE = '''
         </div>
     </div>
 
-    <!-- Модальное окно ввода кода -->
     <div id="resetCodeModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeResetCodeModal()">&times;</span>
@@ -877,16 +950,23 @@ INDEX_TEMPLATE = '''
         </div>
     </div>
 
-    <!-- Модальное окно демо -->
     <div id="demoModal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="width: 500px;">
             <span class="close-modal" onclick="closeDemoModal()">&times;</span>
             <h2>Демо-режим</h2>
-            <p style="color:#a0a0b0; margin-bottom:15px">Примеры мониторинга цен:</p>
-            <div style="background:#1a1a24; border-radius:12px; padding:12px; margin:12px 0;">
-                <div style="margin-bottom:8px;"><strong>Avito:</strong> iPhone 15 Pro - 89 990 ₽</div>
-                <div style="margin-bottom:8px;"><strong>Ozon:</strong> Samsung S24 Ultra - 112 490 ₽</div>
-                <div><strong>Wildberries:</strong> AirPods Pro 2 - 24 990 ₽</div>
+            <div style="background: #1a1a24; border-radius: 12px; padding: 16px; margin: 16px 0;">
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+                    <div style="width: 50px; height: 50px; background-image: url('https://www.apple.com/newsroom/images/product/iphone/standard/iPhone_15_Pro_hero_091223.jpg'); background-size: cover; border-radius: 10px;"></div>
+                    <div><strong>iPhone 15 Pro</strong><br><span style="color:#8cd4a0">89 990 ₽</span> <span style="text-decoration:line-through; color:#a0a0a0; margin-left:8px">94 990 ₽</span></div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 12px;">
+                    <div style="width: 50px; height: 50px; background-image: url('https://image-us.samsung.com/SamsungUS/home/mobile/phones/galaxy-s24-ultra/S24_Ultra_Graphite_Hero_240131.jpg'); background-size: cover; border-radius: 10px;"></div>
+                    <div><strong>Samsung S24 Ultra</strong><br><span style="color:#8cd4a0">112 490 ₽</span> <span style="text-decoration:line-through; color:#a0a0a0; margin-left:8px">109 990 ₽</span></div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; background-image: url('https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-pro-2-hero?wid=940&hei=940&fmt=jpeg&qlt=90&.v=1661209562052'); background-size: cover; border-radius: 10px;"></div>
+                    <div><strong>AirPods Pro 2</strong><br><span style="color:#8cd4a0">24 990 ₽</span> <span style="text-decoration:line-through; color:#a0a0a0; margin-left:8px">27 990 ₽</span></div>
+                </div>
             </div>
             <button onclick="closeDemoModal(); openRegisterModal()" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Начать отслеживать</button>
         </div>
@@ -895,188 +975,206 @@ INDEX_TEMPLATE = '''
     <div id="toastContainer"></div>
 
     <script>
-        function createParticles() {
-            const container = document.getElementById('particles');
-            for (let i = 0; i < 60; i++) {
-                const p = document.createElement('div');
-                p.classList.add('particle');
-                p.style.width = (Math.random() * 6 + 2) + 'px';
-                p.style.height = p.style.width;
-                p.style.left = Math.random() * 100 + '%';
-                p.style.animationDuration = (Math.random() * 25 + 15) + 's';
-                p.style.animationDelay = (Math.random() * 20) + 's';
-                p.style.opacity = Math.random() * 0.4 + 0.1;
-                container.appendChild(p);
+        (function() {
+            function createParticles() {
+                const container = document.getElementById('particles');
+                if (!container) return;
+                for (let i = 0; i < 60; i++) {
+                    const p = document.createElement('div');
+                    p.classList.add('particle');
+                    p.style.width = (Math.random() * 6 + 2) + 'px';
+                    p.style.height = p.style.width;
+                    p.style.left = Math.random() * 100 + '%';
+                    p.style.animationDuration = (Math.random() * 25 + 15) + 's';
+                    p.style.animationDelay = (Math.random() * 20) + 's';
+                    p.style.opacity = Math.random() * 0.4 + 0.1;
+                    container.appendChild(p);
+                }
             }
-        }
-        createParticles();
+            createParticles();
 
-        function showToast(message, type = 'error') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast ${type}`;
-            toast.innerHTML = `<div class="toast-content"><span class="toast-message">${message}</span><span class="toast-close" onclick="this.parentElement.parentElement.remove()">×</span></div>`;
-            container.appendChild(toast);
-            setTimeout(() => toast.classList.add('show'), 10);
-            setTimeout(() => {
-                toast.classList.remove('show');
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
-        }
+            window.showToast = function(message, type = 'error') {
+                const container = document.getElementById('toastContainer');
+                const toast = document.createElement('div');
+                toast.className = `toast ${type}`;
+                toast.innerHTML = `<div class="toast-content"><span class="toast-message">${message}</span><span class="toast-close" onclick="this.parentElement.parentElement.remove()">×</span></div>`;
+                container.appendChild(toast);
+                setTimeout(() => toast.classList.add('show'), 10);
+                setTimeout(() => {
+                    toast.classList.remove('show');
+                    setTimeout(() => toast.remove(), 300);
+                }, 4000);
+            };
 
-        // Плавный скролл
-        function scrollToSection(sectionId) {
-            const element = document.getElementById(sectionId);
-            if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start', duration: 800 });
-            }
-        }
+            window.scrollToSection = function(sectionId) {
+                const element = document.getElementById(sectionId);
+                if (!element) return;
 
-        // Обработчики кликов на иконках
-        document.querySelectorAll('.feature').forEach((feature, index) => {
+                const elementPosition = element.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - (window.innerHeight / 2) + (element.offsetHeight / 2);
+                const startPosition = window.pageYOffset;
+                const distance = offsetPosition - startPosition;
+                const duration = 1200;
+                let startTime = null;
+
+                function animation(currentTime) {
+                    if (startTime === null) startTime = currentTime;
+                    const timeElapsed = currentTime - startTime;
+                    const progress = Math.min(timeElapsed / duration, 1);
+                    const easeProgress = progress < 0.5 
+                        ? 4 * progress * progress * progress 
+                        : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                    window.scrollTo(0, startPosition + distance * easeProgress);
+                    if (timeElapsed < duration) {
+                        requestAnimationFrame(animation);
+                    }
+                }
+                requestAnimationFrame(animation);
+            };
+
             const sections = ['monitoring-detail', 'ai-detail', 'telegram-detail', 'analytics-detail'];
-            feature.addEventListener('click', () => {
-                scrollToSection(sections[index]);
+            document.querySelectorAll('.feature').forEach((feature, index) => {
+                feature.addEventListener('click', () => {
+                    if (sections[index]) {
+                        scrollToSection(sections[index]);
+                    }
+                });
             });
-        });
 
-        // График
-        const ctx = document.getElementById('priceChart')?.getContext('2d');
-        if (ctx) {
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-                    datasets: [{
-                        label: 'Цена конкурента',
-                        data: [94990, 93990, 92990, 91990, 90990, 89990, 89990],
-                        borderColor: '#8cd4a0',
-                        backgroundColor: 'rgba(140,212,160,0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true,
-                    plugins: { legend: { labels: { color: '#e0e0e0' } } },
-                    scales: { y: { ticks: { color: '#a0a0b0' } }, x: { ticks: { color: '#a0a0b0' } } }
-                }
+            const ctx = document.getElementById('priceChart')?.getContext('2d');
+            if (ctx) {
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                        datasets: [{
+                            label: 'Цена конкурента',
+                            data: [94990, 93990, 92990, 91990, 90990, 89990, 89990],
+                            borderColor: '#8cd4a0',
+                            backgroundColor: 'rgba(140,212,160,0.1)',
+                            fill: true,
+                            tension: 0.3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: { legend: { labels: { color: '#e0e0e0' } } },
+                        scales: { y: { ticks: { color: '#a0a0b0' } }, x: { ticks: { color: '#a0a0b0' } } }
+                    }
+                });
+            }
+
+            window.openLoginModal = function() { document.getElementById('loginModal').style.display = 'flex'; };
+            window.closeLoginModal = function() { document.getElementById('loginModal').style.display = 'none'; };
+            window.openRegisterModal = function() { document.getElementById('registerModal').style.display = 'flex'; };
+            window.closeRegisterModal = function() { document.getElementById('registerModal').style.display = 'none'; };
+            window.openForgotModal = function() { document.getElementById('forgotModal').style.display = 'flex'; };
+            window.closeForgotModal = function() { document.getElementById('forgotModal').style.display = 'none'; };
+            window.openResetCodeModal = function() { document.getElementById('resetCodeModal').style.display = 'flex'; };
+            window.closeResetCodeModal = function() { document.getElementById('resetCodeModal').style.display = 'none'; };
+            window.openDemoModal = function() { document.getElementById('demoModal').style.display = 'flex'; };
+            window.closeDemoModal = function() { document.getElementById('demoModal').style.display = 'none'; };
+
+            window.onclick = function(event) {
+                const modals = ['loginModal', 'registerModal', 'forgotModal', 'resetCodeModal', 'demoModal'];
+                modals.forEach(modalId => {
+                    const modal = document.getElementById(modalId);
+                    if (event.target === modal) {
+                        modal.style.display = 'none';
+                    }
+                });
+            };
+
+            document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+                try {
+                    const res = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Вход выполнен! Перенаправление...', 'success');
+                        setTimeout(() => window.location.href = '/dashboard', 1000);
+                    } else {
+                        showToast(data.error, 'error');
+                    }
+                } catch(e) { showToast('Ошибка подключения', 'error'); }
             });
-        }
 
-        // Модальные окна
-        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
-        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
-        function openRegisterModal() { document.getElementById('registerModal').style.display = 'flex'; }
-        function closeRegisterModal() { document.getElementById('registerModal').style.display = 'none'; }
-        function openForgotModal() { document.getElementById('forgotModal').style.display = 'flex'; }
-        function closeForgotModal() { document.getElementById('forgotModal').style.display = 'none'; }
-        function openResetCodeModal() { document.getElementById('resetCodeModal').style.display = 'flex'; }
-        function closeResetCodeModal() { document.getElementById('resetCodeModal').style.display = 'none'; }
-        function openDemoModal() { document.getElementById('demoModal').style.display = 'flex'; }
-        function closeDemoModal() { document.getElementById('demoModal').style.display = 'none'; }
-
-        // Закрытие по клику вне окна
-        window.onclick = function(event) {
-            const modals = ['loginModal', 'registerModal', 'forgotModal', 'resetCodeModal', 'demoModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-
-        // Формы
-        document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            try {
-                const res = await fetch('/api/login', {
+            document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('regName').value;
+                const email = document.getElementById('regEmail').value;
+                const phone = document.getElementById('regPhone').value;
+                const password = document.getElementById('regPassword').value;
+                const confirm = document.getElementById('regConfirm').value;
+                if (password !== confirm) { showToast('Пароли не совпадают', 'error'); return; }
+                if (password.length < 6) { showToast('Пароль минимум 6 символов', 'error'); return; }
+                const res = await fetch('/api/register', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ name, email, phone, password })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('Вход выполнен! Перенаправление...', 'success');
-                    setTimeout(() => window.location.href = '/dashboard', 1000);
+                    showToast('Регистрация успешна! Проверьте почту для подтверждения', 'success');
+                    setTimeout(() => window.location.href = '/', 2000);
                 } else {
                     showToast(data.error, 'error');
                 }
-            } catch(e) { showToast('Ошибка подключения', 'error'); }
-        });
-
-        document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('regName').value;
-            const email = document.getElementById('regEmail').value;
-            const phone = document.getElementById('regPhone').value;
-            const password = document.getElementById('regPassword').value;
-            const confirm = document.getElementById('regConfirm').value;
-            if (password !== confirm) { showToast('Пароли не совпадают', 'error'); return; }
-            if (password.length < 6) { showToast('Пароль минимум 6 символов', 'error'); return; }
-            const res = await fetch('/api/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, email, phone, password })
             });
-            const data = await res.json();
-            if (data.success) {
-                showToast('Регистрация успешна! Проверьте почту для подтверждения', 'success');
-                setTimeout(() => window.location.href = '/', 2000);
-            } else {
-                showToast(data.error, 'error');
-            }
-        });
 
-        document.getElementById('forgotForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('forgotEmail').value;
-            if (!email) { showToast('Введите email', 'error'); return; }
-            showToast('Отправка кода...', 'warning');
-            try {
-                const res = await fetch('/api/forgot-password', {
+            document.getElementById('forgotForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = document.getElementById('forgotEmail').value;
+                if (!email) { showToast('Введите email', 'error'); return; }
+                showToast('Отправка кода...', 'warning');
+                try {
+                    const res = await fetch('/api/forgot-password', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        showToast('Код отправлен на почту', 'success');
+                        closeForgotModal();
+                        setTimeout(() => { openResetCodeModal(); window.resetEmail = email; }, 500);
+                    } else {
+                        showToast(data.error || 'Ошибка отправки', 'error');
+                    }
+                } catch (error) {
+                    showToast('Ошибка подключения к серверу', 'error');
+                }
+            });
+
+            document.getElementById('resetCodeForm')?.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const code = document.getElementById('resetCode').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirm = document.getElementById('confirmNewPassword').value;
+                if (newPassword !== confirm) { showToast('Пароли не совпадают', 'error'); return; }
+                if (newPassword.length < 6) { showToast('Пароль минимум 6 символов', 'error'); return; }
+                const res = await fetch('/api/reset-password', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email: email })
+                    body: JSON.stringify({ email: window.resetEmail, code, new_password: newPassword })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('Код отправлен на почту', 'success');
-                    closeForgotModal();
-                    setTimeout(() => { openResetCodeModal(); window.resetEmail = email; }, 500);
+                    showToast('Пароль изменен! Войдите с новым паролем', 'success');
+                    closeResetCodeModal();
+                    openLoginModal();
                 } else {
-                    showToast(data.error || 'Ошибка отправки', 'error');
+                    showToast(data.error, 'error');
                 }
-            } catch (error) {
-                showToast('Ошибка подключения к серверу', 'error');
-            }
-        });
-
-        document.getElementById('resetCodeForm')?.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const code = document.getElementById('resetCode').value;
-            const newPassword = document.getElementById('newPassword').value;
-            const confirm = document.getElementById('confirmNewPassword').value;
-            if (newPassword !== confirm) { showToast('Пароли не совпадают', 'error'); return; }
-            if (newPassword.length < 6) { showToast('Пароль минимум 6 символов', 'error'); return; }
-            const res = await fetch('/api/reset-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: window.resetEmail, code, new_password: newPassword })
             });
-            const data = await res.json();
-            if (data.success) {
-                showToast('Пароль изменен! Войдите с новым паролем', 'success');
-                closeResetCodeModal();
-                openLoginModal();
-            } else {
-                showToast(data.error, 'error');
-            }
-        });
+        })();
     </script>
 </body>
 </html>
@@ -1771,65 +1869,68 @@ def api_reset_password():
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
-        email = request.form.get('email')
-        
-        if not email:
-            return render_template_string(FORGOT_TEMPLATE, error="Введите email")
-        
+        email = request.form['email']
+
+        # Проверяем, существует ли пользователь
         conn = db.conn
         cursor = conn.cursor()
-        cursor.execute('SELECT id, email FROM users WHERE email = ?', (email,))
+        cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
         user = cursor.fetchone()
-        
-        if not user:
-            return render_template_string(FORGOT_TEMPLATE, error="Пользователь с таким email не найден")
-        
-        # Генерируем код
-        import random
-        reset_code = ''.join(random.choices('0123456789', k=6))
-        
-        # Сохраняем код в базу
-        expires_at = datetime.now() + timedelta(minutes=15)
-        cursor.execute('UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE id = ?', 
-                      (reset_code, expires_at, user[0]))
-        conn.commit()
-        
-        # Отправляем письмо
-        subject = "Восстановление пароля - PriceMonitor"
-        body = f"""
-        <html>
-        <body style="font-family: Arial, sans-serif;">
-            <h2>Восстановление пароля</h2>
-            <p>Ваш код для сброса пароля: <strong style="font-size: 24px; color: #667eea;">{reset_code}</strong></p>
-            <p>Введите этот код на сайте для восстановления пароля.</p>
-            <p>Код действителен 15 минут.</p>
-            <hr>
-            <p>Если вы не запрашивали восстановление пароля, проигнорируйте это письмо.</p>
-        </body>
-        </html>
-        """
-        
-        try:
-            msg = MIMEMultipart()
-            msg['From'] = SMTP_USER
-            msg['To'] = email
-            msg['Subject'] = subject
-            msg.attach(MIMEText(body, 'html', 'utf-8'))
-            server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-            server.starttls()
-            server.login(SMTP_USER, SMTP_PASSWORD)
-            server.send_message(msg)
-            server.quit()
-            
-            # Переходим на страницу ввода кода
-            session['reset_email'] = email
-            return render_template_string(RESET_CODE_TEMPLATE, email=email)
-            
-        except Exception as e:
-            print(f"Ошибка отправки: {e}")
-            return render_template_string(FORGOT_TEMPLATE, error="Ошибка отправки письма. Попробуйте позже.")
-    
+
+        if user:
+            # Генерируем код восстановления
+            import random
+            reset_code = ''.join(random.choices('0123456789', k=6))
+
+            # Время истечения - через 15 минут
+            expires_at = datetime.now() + timedelta(minutes=15)
+
+            # Сохраняем код в базу (как текст, без форматирования)
+            cursor.execute('UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE id = ?',
+                           (reset_code, expires_at.strftime('%Y-%m-%d %H:%M:%S'), user[0]))
+            conn.commit()
+
+            # Отправляем код на почту
+            subject = "Восстановление пароля - PriceMonitor"
+            body = f"""
+            <html>
+            <body style="font-family: Arial, sans-serif;">
+                <h2>Восстановление пароля</h2>
+                <p>Ваш код для сброса пароля: <strong style="font-size: 24px; color: #667eea;">{reset_code}</strong></p>
+                <p>Введите этот код на странице восстановления пароля.</p>
+                <p>Код действителен 15 минут.</p>
+                <hr>
+                <p>Если вы не запрашивали восстановление пароля, проигнорируйте это письмо.</p>
+                <p>С уважением,<br>Команда PriceMonitor</p>
+            </body>
+            </html>
+            """
+
+            try:
+                msg = MIMEMultipart()
+                msg['From'] = SMTP_USER
+                msg['To'] = email
+                msg['Subject'] = subject
+                msg.attach(MIMEText(body, 'html', 'utf-8'))
+                server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+                server.starttls()
+                server.login(SMTP_USER, SMTP_PASSWORD)
+                server.send_message(msg)
+                server.quit()
+
+                # Сохраняем email в сессию для следующего шага
+                session['reset_email'] = email
+
+                return render_template_string(RESET_CODE_TEMPLATE, email=email)
+
+            except Exception as e:
+                print(f"Ошибка отправки: {e}")
+                return 'Ошибка при отправке письма. Попробуйте позже.'
+        else:
+            return 'Пользователь с таким email не найден'
+
     return render_template_string(FORGOT_TEMPLATE)
+
 
 # Шаблон для ввода кода
 RESET_CODE_TEMPLATE = '''
@@ -1841,22 +1942,25 @@ RESET_CODE_TEMPLATE = '''
     .card{background:rgba(20,20,26,0.8);backdrop-filter:blur(10px);padding:40px;border-radius:16px;width:380px;border:1px solid rgba(42,42,53,0.5);text-align:center}
     input{width:100%;padding:12px;margin:10px 0;background:rgba(15,15,18,0.8);border:1px solid #2a2a35;border-radius:8px;color:#fff;text-align:center;font-size:20px;letter-spacing:5px}
     button{width:100%;padding:12px;background:#2a2a35;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-top:10px}
-    .error{color:#f0a0a0;margin-bottom:15px}
-    .link{margin-top:20px}
-    .link a{color:#a0a0b0;text-decoration:none}
+    a{color:#a0a0b0;text-decoration:none}
+    .header-buttons{text-align:left;margin-bottom:20px}
+    .btn-small{padding:5px 12px;font-size:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;color:#a0a0b0;text-decoration:none}
+    .btn-small:hover{background:#2a2a35;color:#fff}
 </style></head>
 <body>
 <div class="card">
+    <div class="header-buttons"><a href="/login" class="btn-small">← Назад</a></div>
     <h2>Введите код</h2>
     <p>Код отправлен на <strong>{{ email }}</strong></p>
-    {% if error %}<div class="error">{{ error }}</div>{% endif %}
     <form method="post" action="/reset-password">
         <input type="text" name="code" placeholder="Код из письма" maxlength="6" autocomplete="off">
         <input type="password" name="new_password" placeholder="Новый пароль">
         <input type="password" name="confirm_password" placeholder="Подтвердите пароль">
         <button type="submit">Сбросить пароль</button>
     </form>
-    <div class="link"><a href="/forgot-password">Отправить код повторно</a></div>
+    <div style="margin-top:20px">
+        <a href="/forgot-password">Отправить код повторно</a>
+    </div>
 </div>
 </body>
 </html>
@@ -1871,23 +1975,20 @@ FORGOT_TEMPLATE = '''
     .card{background:rgba(20,20,26,0.8);backdrop-filter:blur(10px);padding:40px;border-radius:16px;width:350px;border:1px solid rgba(42,42,53,0.5)}
     input{width:100%;padding:12px;margin:10px 0;background:rgba(15,15,18,0.8);border:1px solid #2a2a35;border-radius:8px;color:#fff}
     button{width:100%;padding:12px;background:#2a2a35;color:#fff;border:none;border-radius:8px;cursor:pointer}
-    .error{color:#f0a0a0;text-align:center;margin-bottom:15px}
-    .link{text-align:center;margin-top:20px}
-    .link a{color:#a0a0b0;text-decoration:none}
+    a{color:#a0a0b0;text-decoration:none}
     .header-buttons{margin-bottom:20px}
-    .btn-small{padding:5px 12px;font-size:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;color:#a0a0b0;text-decoration:none;display:inline-block}
+    .btn-small{padding:5px 12px;font-size:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;color:#a0a0b0;text-decoration:none}
     .btn-small:hover{background:#2a2a35;color:#fff}
 </style></head>
 <body>
 <div class="card">
     <div class="header-buttons"><a href="/login" class="btn-small">← Назад</a></div>
     <h2 style="text-align:center;margin-bottom:30px">Восстановление пароля</h2>
-    {% if error %}<div class="error">{{ error }}</div>{% endif %}
     <form method="post">
         <input type="email" name="email" placeholder="Email" required>
         <button type="submit">Отправить код</button>
     </form>
-    <div class="link"><a href="/login">Вернуться ко входу</a></div>
+    <div style="text-align:center;margin-top:20px"><a href="/login">Вернуться ко входу</a></div>
 </div>
 </body>
 </html>
