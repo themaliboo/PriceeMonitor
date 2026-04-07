@@ -222,7 +222,7 @@ INDEX_TEMPLATE = '''
 <head>
     <title>PriceMonitor - Мониторинг цен конкурентов</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -343,8 +343,11 @@ INDEX_TEMPLATE = '''
         .detail-text ul { list-style: none; padding: 0; }
         .detail-text li { padding: 8px 0; padding-left: 24px; position: relative; color: #c0c0d0; }
         .detail-text li::before { content: "✓"; position: absolute; left: 0; color: #8cd4a0; }
-        .detail-chart { flex: 1; min-width: 300px; pointer-events: auto; }
+        .detail-chart { flex: 1; min-width: 300px; width: 100%; overflow-x: auto; pointer-events: auto; }
         .chart-caption { font-size: 12px; color: #6a6a7a; text-align: center; margin-top: 8px; }
+        
+        #priceChart { width: 100% !important; height: auto !important; max-width: 100%; background: rgba(26,26,36,0.6); border-radius: 12px; padding: 10px; }
+        canvas { max-width: 100%; height: auto; }
 
         .pricing { padding: 80px 0; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(15,15,18,0.5); backdrop-filter: blur(5px); }
         .pricing h2 { text-align: center; font-size: 32px; font-weight: 600; margin-bottom: 56px; background: linear-gradient(135deg, #ffffff, #9090b0); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -456,254 +459,71 @@ INDEX_TEMPLATE = '''
         .toast-message { color: #fff; font-size: 14px; }
         .toast-close { cursor: pointer; color: #a0a0b0; font-size: 20px; margin-left: 15px; }
 
+        /* АДАПТАЦИЯ ПОД ТЕЛЕФОН */
         @media (max-width: 768px) {
-            .hero h1 { font-size: 36px; }
-            .hero p { font-size: 16px; }
-            .features-grid { grid-template-columns: 1fr; }
-            .nav a { margin-left: 16px; }
-            .detail-content { flex-direction: column; }
-        }
-                    /* АДАПТАЦИЯ ПОД ТЕЛЕФОН */
-        @media (max-width: 768px) {
-            /* Общие отступы */
-            .container {
-                padding: 0 16px;
-            }
-            
-            /* Шапка */
-            .header {
-                padding: 12px 0;
-            }
-            .header-content {
-                flex-direction: column;
-                gap: 12px;
-                text-align: center;
-            }
-            .nav a {
-                margin: 0 12px;
-                font-size: 13px;
-            }
-            
-            /* Герой секция */
-            .hero {
-                padding: 40px 0 30px;
-            }
-            .hero h1 {
-                font-size: 28px;
-            }
-            .hero p {
-                font-size: 14px;
-                padding: 0 10px;
-            }
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-                gap: 12px;
-            }
-            .btn {
-                padding: 10px 20px;
-                font-size: 13px;
-                width: 200px;
-                text-align: center;
-            }
-            
-            /* Возможности сервиса */
-            .features {
-                padding: 40px 0;
-            }
-            .features h2 {
-                font-size: 24px;
-                margin-bottom: 30px;
-            }
-            .features-grid {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-            .feature {
-                padding: 20px 16px;
-            }
-            .feature-icon {
-                font-size: 32px;
-            }
-            .feature h3 {
-                font-size: 16px;
-            }
-            .feature p {
-                font-size: 12px;
-            }
-            
-            /* Детальные секции */
-            .detail-section {
-                padding: 20px;
-                margin-bottom: 16px;
-            }
-            .detail-header {
-                gap: 12px;
-                margin-bottom: 16px;
-            }
-            .detail-icon {
-                font-size: 24px;
-            }
-            .detail-header h2 {
-                font-size: 18px;
-            }
-            .detail-content {
-                flex-direction: column;
-                gap: 20px;
-            }
-            .detail-text p {
-                font-size: 13px;
-            }
-            .detail-text li {
-                font-size: 12px;
-                padding: 6px 0 6px 20px;
-            }
-            .detail-chart {
-                min-width: auto;
-            }
-            .chart-caption {
-                font-size: 10px;
-            }
-            
-            /* График */
-            #priceChart {
-                height: 180px !important;
-            }
-            
-            /* Тарифы */
-            .pricing {
-                padding: 40px 0;
-            }
-            .pricing h2 {
-                font-size: 24px;
-                margin-bottom: 30px;
-            }
-            .pricing-grid {
-                gap: 16px;
-            }
-            .pricing-card {
-                padding: 20px;
-                width: 100%;
-                max-width: 280px;
-            }
-            .pricing-card h3 {
-                font-size: 18px;
-            }
-            .pricing-price {
-                font-size: 32px;
-            }
-            .pricing-features li {
-                font-size: 12px;
-                padding: 5px 0;
-            }
-            
-            /* Модальные окна */
-            .modal-content {
-                width: 90%;
-                padding: 24px;
-                margin: 20px;
-            }
-            .modal-content h2 {
-                font-size: 20px;
-                margin-bottom: 20px;
-            }
-            .modal-content input {
-                padding: 10px;
-                font-size: 14px;
-            }
-            .modal-content button {
-                padding: 10px;
-                font-size: 14px;
-            }
-            .modal-content a {
-                font-size: 12px;
-            }
-            
-            /* Демо-режим */
-            #demoModal .modal-content {
-                width: 90%;
-                max-width: 400px;
-            }
-            #demoModal .modal-content h2 {
-                font-size: 20px;
-            }
-            .demo-product-card {
-                flex-direction: column;
-                text-align: center;
-                gap: 10px;
-            }
-            .demo-product-image {
-                width: 70px;
-                height: 70px;
-                margin: 0 auto;
-            }
-            .demo-product-title {
-                font-size: 14px;
-            }
-            .current-price {
-                font-size: 18px;
-            }
-            
-            /* Уведомления */
-            .toast {
-                left: 16px;
-                right: 16px;
-                min-width: auto;
-                padding: 12px 16px;
-            }
-            .toast-message {
-                font-size: 12px;
-            }
-            
-            /* Футер */
-            .footer {
-                padding: 30px 0;
-                font-size: 10px;
-            }
+            .container { padding: 0 16px; }
+            .header { padding: 12px 0; }
+            .header-content { flex-direction: column; gap: 12px; text-align: center; }
+            .nav a { margin: 0 12px; font-size: 13px; }
+            .hero { padding: 40px 0 30px; }
+            .hero h1 { font-size: 28px; }
+            .hero p { font-size: 14px; padding: 0 10px; }
+            .hero-buttons { flex-direction: column; align-items: center; gap: 12px; }
+            .btn { padding: 10px 20px; font-size: 13px; width: 200px; text-align: center; }
+            .features { padding: 40px 0; }
+            .features h2 { font-size: 24px; margin-bottom: 30px; }
+            .features-grid { grid-template-columns: 1fr; gap: 16px; }
+            .feature { padding: 20px 16px; }
+            .feature-icon { font-size: 32px; }
+            .feature h3 { font-size: 16px; }
+            .feature p { font-size: 12px; }
+            .detail-section { padding: 20px; margin-bottom: 16px; }
+            .detail-header { gap: 12px; margin-bottom: 16px; }
+            .detail-icon { font-size: 24px; }
+            .detail-header h2 { font-size: 18px; }
+            .detail-content { flex-direction: column; gap: 20px; }
+            .detail-text p { font-size: 13px; }
+            .detail-text li { font-size: 12px; padding: 6px 0 6px 20px; }
+            .detail-chart { min-width: auto; width: 100%; overflow-x: auto; }
+            #priceChart { height: 180px !important; }
+            .chart-caption { font-size: 10px; }
+            .pricing { padding: 40px 0; }
+            .pricing h2 { font-size: 24px; margin-bottom: 30px; }
+            .pricing-grid { gap: 16px; }
+            .pricing-card { padding: 20px; width: 100%; max-width: 280px; }
+            .pricing-card h3 { font-size: 18px; }
+            .pricing-price { font-size: 32px; }
+            .pricing-features li { font-size: 12px; padding: 5px 0; }
+            .modal-content { width: 90%; padding: 24px; margin: 20px; }
+            .modal-content h2 { font-size: 20px; margin-bottom: 20px; }
+            .modal-content input { padding: 10px; font-size: 14px; }
+            .modal-content button { padding: 10px; font-size: 14px; }
+            .modal-content a { font-size: 12px; }
+            #demoModal .modal-content { width: 90%; max-width: 400px; }
+            .demo-product-card { flex-direction: column; text-align: center; gap: 10px; }
+            .demo-product-image { width: 70px; height: 70px; margin: 0 auto; }
+            .demo-product-title { font-size: 14px; }
+            .current-price { font-size: 18px; }
+            .toast { left: 16px; right: 16px; min-width: auto; padding: 12px 16px; }
+            .toast-message { font-size: 12px; }
+            .footer { padding: 30px 0; font-size: 10px; }
         }
         
-        /* Для очень маленьких экранов (iPhone SE и т.д.) */
         @media (max-width: 480px) {
-            .hero h1 {
-                font-size: 24px;
-            }
-            .btn {
-                width: 180px;
-                padding: 8px 16px;
-            }
-            .feature-icon {
-                font-size: 28px;
-            }
-            .pricing-card {
-                padding: 16px;
-            }
-            .pricing-price {
-                font-size: 28px;
-            }
-            .modal-content {
-                padding: 20px;
-            }
-            .demo-product-image {
-                width: 60px;
-                height: 60px;
-            }
+            .hero h1 { font-size: 24px; }
+            .btn { width: 180px; padding: 8px 16px; }
+            .feature-icon { font-size: 28px; }
+            .pricing-card { padding: 16px; }
+            .pricing-price { font-size: 28px; }
+            .modal-content { padding: 20px; }
+            .demo-product-image { width: 60px; height: 60px; }
         }
         
-        /* Для планшетов */
         @media (min-width: 769px) and (max-width: 1024px) {
-            .features-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            .pricing-grid {
-                gap: 20px;
-            }
-            .pricing-card {
-                width: 240px;
-            }
-            .detail-content {
-                gap: 30px;
-            }
+            .features-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
+            .pricing-grid { gap: 20px; }
+            .pricing-card { width: 240px; }
+            .detail-content { gap: 30px; }
         }
     </style>
 </head>
@@ -775,7 +595,7 @@ INDEX_TEMPLATE = '''
                     </ul>
                 </div>
                 <div class="detail-chart">
-                    <canvas id="priceChart" width="400" height="200" style="background: rgba(26,26,36,0.6); border-radius: 12px; padding: 10px;"></canvas>
+                    <canvas id="priceChart" style="background: rgba(26,26,36,0.6); border-radius: 12px; padding: 10px;"></canvas>
                     <p class="chart-caption">Пример графика изменения цены конкурента за неделю</p>
                 </div>
             </div>
@@ -809,7 +629,7 @@ INDEX_TEMPLATE = '''
             </div>
         </div>
 
-                <div id="telegram-detail" class="detail-section">
+        <div id="telegram-detail" class="detail-section">
             <div class="detail-header">
                 <div class="detail-icon">◎</div>
                 <h2>Telegram уведомления</h2>
@@ -1009,14 +829,14 @@ INDEX_TEMPLATE = '''
             window.scrollToSection = function(sectionId) {
                 const element = document.getElementById(sectionId);
                 if (!element) return;
-
+                
                 const elementPosition = element.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - (window.innerHeight / 2) + (element.offsetHeight / 2);
                 const startPosition = window.pageYOffset;
                 const distance = offsetPosition - startPosition;
                 const duration = 1200;
                 let startTime = null;
-
+                
                 function animation(currentTime) {
                     if (startTime === null) startTime = currentTime;
                     const timeElapsed = currentTime - startTime;
@@ -1053,14 +873,40 @@ INDEX_TEMPLATE = '''
                             borderColor: '#8cd4a0',
                             backgroundColor: 'rgba(140,212,160,0.1)',
                             fill: true,
-                            tension: 0.3
+                            tension: 0.3,
+                            pointRadius: 3,
+                            pointHoverRadius: 5
                         }]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: true,
-                        plugins: { legend: { labels: { color: '#e0e0e0' } } },
-                        scales: { y: { ticks: { color: '#a0a0b0' } }, x: { ticks: { color: '#a0a0b0' } } }
+                        plugins: {
+                            legend: { 
+                                labels: { 
+                                    color: '#e0e0e0',
+                                    font: { size: window.innerWidth < 768 ? 10 : 12 }
+                                } 
+                            },
+                            tooltip: {
+                                bodyFont: { size: window.innerWidth < 768 ? 10 : 12 }
+                            }
+                        },
+                        scales: { 
+                            y: { 
+                                ticks: { 
+                                    color: '#a0a0b0',
+                                    font: { size: window.innerWidth < 768 ? 9 : 11 },
+                                    callback: function(value) { return value.toLocaleString() + '₽'; }
+                                } 
+                            }, 
+                            x: { 
+                                ticks: { 
+                                    color: '#a0a0b0',
+                                    font: { size: window.innerWidth < 768 ? 10 : 12 }
+                                } 
+                            } 
+                        }
                     }
                 });
             }
