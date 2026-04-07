@@ -386,7 +386,7 @@ INDEX_TEMPLATE = '''
             pointer-events: none;
         }
 
-        /* Детальные секции */
+        /* Детальные секции - всегда видимы */
         .detail-section {
             background: rgba(20,20,26,0.6);
             backdrop-filter: blur(5px);
@@ -394,13 +394,11 @@ INDEX_TEMPLATE = '''
             padding: 32px;
             margin-bottom: 24px;
             border: 1px solid rgba(42,42,53,0.5);
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.5s ease;
+            transition: transform 0.3s, border-color 0.3s;
         }
-        .detail-section.visible {
-            opacity: 1;
-            transform: translateY(0);
+        .detail-section:hover {
+            transform: translateY(-4px);
+            border-color: rgba(100,100,150,0.4);
         }
         .detail-header {
             display: flex;
@@ -507,6 +505,93 @@ INDEX_TEMPLATE = '''
 
         .footer { padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 12px; color: #6a6a7a; }
 
+        /* Модальные окна */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(8px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: rgba(20,20,26,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 32px;
+            width: 400px;
+            border: 1px solid rgba(255,255,255,0.1);
+            position: relative;
+        }
+        .modal-content h2 { margin-bottom: 24px; text-align: center; color: #fff; }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: rgba(15,15,18,0.8);
+            border: 1px solid #2a2a35;
+            border-radius: 8px;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            background: #2a2a35;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .modal-content button:hover { background: #3a3a48; }
+        .modal-content a {
+            color: #a0a0b0;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 13px;
+            cursor: pointer;
+        }
+        .modal-content a:hover { color: #fff; }
+        .close-modal {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #a0a0b0;
+        }
+        .close-modal:hover { color: #fff; }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(20,20,26,0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 16px 24px;
+            min-width: 280px;
+            border-left: 4px solid;
+            z-index: 1100;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+        .toast.show { transform: translateX(0); }
+        .toast.error { border-left-color: #f56565; }
+        .toast.success { border-left-color: #8cd4a0; }
+        .toast.warning { border-left-color: #ecc94b; }
+        .toast-content { display: flex; justify-content: space-between; align-items: center; }
+        .toast-message { color: #fff; font-size: 14px; }
+        .toast-close { cursor: pointer; color: #a0a0b0; font-size: 20px; margin-left: 15px; }
+
         @media (max-width: 768px) {
             .hero h1 { font-size: 36px; }
             .hero p { font-size: 16px; }
@@ -548,27 +633,27 @@ INDEX_TEMPLATE = '''
                 <div class="feature" data-section="monitoring-detail">
                     <div class="feature-icon">◈</div>
                     <h3>Мониторинг 24/7</h3>
-                    <p>Автоматическое отслеживание цен конкурентов в реальном времени</p>
+                    <p>Автоматическое отслеживание цен конкурентов</p>
                 </div>
                 <div class="feature" data-section="ai-detail">
                     <div class="feature-icon">◇</div>
                     <h3>AI рекомендации</h3>
-                    <p>Умные советы по оптимальной цене на основе анализа рынка</p>
+                    <p>Умные советы по оптимальной цене</p>
                 </div>
                 <div class="feature" data-section="telegram-detail">
                     <div class="feature-icon">◎</div>
                     <h3>Telegram бот</h3>
-                    <p>Мгновенные уведомления об изменении цен конкурентов</p>
+                    <p>Мгновенные уведомления об изменениях</p>
                 </div>
                 <div class="feature" data-section="analytics-detail">
                     <div class="feature-icon">○</div>
                     <h3>Детальная аналитика</h3>
-                    <p>Графики и отчёты для принятия решений</p>
+                    <p>Графики и отчёты</p>
                 </div>
             </div>
         </div>
 
-        <!-- Подробные секции -->
+        <!-- Подробные секции (всегда видимы) -->
         <div id="monitoring-detail" class="detail-section">
             <div class="detail-header">
                 <div class="detail-icon">◈</div>
@@ -610,17 +695,17 @@ INDEX_TEMPLATE = '''
                     <div style="background: #1a1a24; border-radius: 16px; padding: 20px;">
                         <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
                             <div>
-                                <div style="color: #8a8a9a; font-size: 12px;">Текущая цена конкурента</div>
+                                <div style="color: #8a8a9a; font-size: 12px;">Цена конкурента</div>
                                 <div style="font-size: 24px; color: #f0a0a0;">94 990 ₽</div>
                             </div>
                             <div style="font-size: 24px;">→</div>
                             <div>
-                                <div style="color: #8a8a9a; font-size: 12px;">Рекомендуемая цена</div>
+                                <div style="color: #8a8a9a; font-size: 12px;">Рекомендуемая</div>
                                 <div style="font-size: 28px; color: #8cd4a0;">89 990 ₽</div>
                             </div>
                         </div>
                         <div style="background: #2a2a4a; padding: 12px; border-radius: 8px; text-align: center;">
-                            💡 AI совет: Снизьте цену на 5% для захвата лидерства
+                            💡 AI совет: Снизьте цену на 5%
                         </div>
                     </div>
                 </div>
@@ -636,7 +721,7 @@ INDEX_TEMPLATE = '''
                 <div class="detail-text">
                     <p>Получайте мгновенные уведомления об изменении цен прямо в Telegram. Ничего не пропустите!</p>
                     <ul>
-                        <li>Мгновенные оповещения о снижении цен конкурентов</li>
+                        <li>Мгновенные оповещения о снижении цен</li>
                         <li>Ежедневные и еженедельные отчёты</li>
                         <li>Уведомления о достижении целевой цены</li>
                         <li>Персональные рекомендации от AI</li>
@@ -732,71 +817,75 @@ INDEX_TEMPLATE = '''
         </div>
     </div>
 
-    <!-- Модальные окна -->
-    <div id="loginModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
-        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:400px;">
-            <span onclick="closeLoginModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
-            <h2 style="margin-bottom:24px;">Вход в аккаунт</h2>
+    <!-- Модальное окно входа -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeLoginModal()">&times;</span>
+            <h2>Вход в аккаунт</h2>
             <form id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
-                <input type="password" id="loginPassword" placeholder="Пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
-                <button type="submit" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Войти</button>
+                <input type="email" id="loginEmail" placeholder="Email" required>
+                <input type="password" id="loginPassword" placeholder="Пароль" required>
+                <button type="submit">Войти</button>
             </form>
-            <a onclick="closeLoginModal(); openRegisterModal()" style="display:block; text-align:center; margin-top:16px; color:#a0a0b0; cursor:pointer;">Нет аккаунта? Зарегистрироваться</a>
-            <a onclick="closeLoginModal(); openForgotModal()" style="display:block; text-align:center; margin-top:8px; color:#a0a0b0; cursor:pointer;">Забыли пароль?</a>
+            <a onclick="closeLoginModal(); openRegisterModal()">Нет аккаунта? Зарегистрироваться</a>
+            <a onclick="closeLoginModal(); openForgotModal()">Забыли пароль?</a>
         </div>
     </div>
 
-    <div id="registerModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
-        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:400px;">
-            <span onclick="closeRegisterModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
-            <h2 style="margin-bottom:24px;">Регистрация</h2>
+    <!-- Модальное окно регистрации -->
+    <div id="registerModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeRegisterModal()">&times;</span>
+            <h2>Регистрация</h2>
             <form id="registerForm">
-                <input type="text" id="regName" placeholder="Имя" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
-                <input type="email" id="regEmail" placeholder="Email" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;" required>
-                <input type="tel" id="regPhone" placeholder="Телефон" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
-                <input type="password" id="regPassword" placeholder="Пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;" required>
-                <input type="password" id="regConfirm" placeholder="Подтвердите пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;" required>
-                <button type="submit" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Зарегистрироваться</button>
+                <input type="text" id="regName" placeholder="Имя">
+                <input type="email" id="regEmail" placeholder="Email" required>
+                <input type="tel" id="regPhone" placeholder="Телефон">
+                <input type="password" id="regPassword" placeholder="Пароль" required>
+                <input type="password" id="regConfirm" placeholder="Подтвердите пароль" required>
+                <button type="submit">Зарегистрироваться</button>
             </form>
-            <a onclick="closeRegisterModal(); openLoginModal()" style="display:block; text-align:center; margin-top:16px; color:#a0a0b0; cursor:pointer;">Уже есть аккаунт? Войти</a>
+            <a onclick="closeRegisterModal(); openLoginModal()">Уже есть аккаунт? Войти</a>
         </div>
     </div>
 
-    <div id="forgotModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
-        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:400px;">
-            <span onclick="closeForgotModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
-            <h2 style="margin-bottom:24px;">Восстановление пароля</h2>
+    <!-- Модальное окно восстановления пароля -->
+    <div id="forgotModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeForgotModal()">&times;</span>
+            <h2>Восстановление пароля</h2>
             <form id="forgotForm">
-                <input type="email" id="forgotEmail" placeholder="Email" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;" required>
-                <button type="submit" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Отправить код</button>
+                <input type="email" id="forgotEmail" placeholder="Email" required>
+                <button type="submit">Отправить код</button>
             </form>
-            <a onclick="closeForgotModal(); openLoginModal()" style="display:block; text-align:center; margin-top:16px; color:#a0a0b0; cursor:pointer;">Вернуться ко входу</a>
+            <a onclick="closeForgotModal(); openLoginModal()">Вернуться ко входу</a>
         </div>
     </div>
 
-    <div id="resetCodeModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
-        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:400px;">
-            <span onclick="closeResetCodeModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
-            <h2 style="margin-bottom:24px;">Введите код</h2>
+    <!-- Модальное окно ввода кода -->
+    <div id="resetCodeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeResetCodeModal()">&times;</span>
+            <h2>Введите код</h2>
             <p style="color:#a0a0b0; text-align:center; margin-bottom:15px">Код отправлен на email</p>
             <form id="resetCodeForm">
-                <input type="text" id="resetCode" placeholder="Код из письма" maxlength="6" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff; text-align:center; font-size:20px;">
-                <input type="password" id="newPassword" placeholder="Новый пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
-                <input type="password" id="confirmNewPassword" placeholder="Подтвердите пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
-                <button type="submit" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Сбросить пароль</button>
+                <input type="text" id="resetCode" placeholder="Код из письма" maxlength="6">
+                <input type="password" id="newPassword" placeholder="Новый пароль">
+                <input type="password" id="confirmNewPassword" placeholder="Подтвердите пароль">
+                <button type="submit">Сбросить пароль</button>
             </form>
         </div>
     </div>
 
-    <div id="demoModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
-        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:500px;">
-            <span onclick="closeDemoModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
-            <h2 style="margin-bottom:24px;">Демо-режим</h2>
-            <p>Примеры мониторинга цен:</p>
+    <!-- Модальное окно демо -->
+    <div id="demoModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeDemoModal()">&times;</span>
+            <h2>Демо-режим</h2>
+            <p style="color:#a0a0b0; margin-bottom:15px">Примеры мониторинга цен:</p>
             <div style="background:#1a1a24; border-radius:12px; padding:12px; margin:12px 0;">
-                <div><strong>Avito:</strong> iPhone 15 Pro - 89 990 ₽</div>
-                <div><strong>Ozon:</strong> Samsung S24 Ultra - 112 490 ₽</div>
+                <div style="margin-bottom:8px;"><strong>Avito:</strong> iPhone 15 Pro - 89 990 ₽</div>
+                <div style="margin-bottom:8px;"><strong>Ozon:</strong> Samsung S24 Ultra - 112 490 ₽</div>
                 <div><strong>Wildberries:</strong> AirPods Pro 2 - 24 990 ₽</div>
             </div>
             <button onclick="closeDemoModal(); openRegisterModal()" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Начать отслеживать</button>
@@ -835,14 +924,11 @@ INDEX_TEMPLATE = '''
             }, 4000);
         }
 
-        // Скролл к секциям
+        // Плавный скролл
         function scrollToSection(sectionId) {
             const element = document.getElementById(sectionId);
             if (element) {
-                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                setTimeout(() => {
-                    element.classList.add('visible');
-                }, 100);
+                element.scrollIntoView({ behavior: 'smooth', block: 'start', duration: 800 });
             }
         }
 
@@ -890,6 +976,17 @@ INDEX_TEMPLATE = '''
         function closeResetCodeModal() { document.getElementById('resetCodeModal').style.display = 'none'; }
         function openDemoModal() { document.getElementById('demoModal').style.display = 'flex'; }
         function closeDemoModal() { document.getElementById('demoModal').style.display = 'none'; }
+
+        // Закрытие по клику вне окна
+        window.onclick = function(event) {
+            const modals = ['loginModal', 'registerModal', 'forgotModal', 'resetCodeModal', 'demoModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        }
 
         // Формы
         document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
