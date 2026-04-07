@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string, request, redirect, url_for, session, jsonify, send_file
+git config --global user.name "themaliboo"from flask import Flask, render_template_string, request, redirect, url_for, session, jsonify, send_file
 from functools import wraps
 from datetime import datetime
 from database import Database
