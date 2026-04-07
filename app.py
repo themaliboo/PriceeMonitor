@@ -13,32 +13,31 @@ from datetime import datetime, timedelta
 
 # ========== ИНИЦИАЛИЗАЦИЯ ==========
 app = Flask(__name__)
-app.secret_key = secrets.token_hex(32)
+app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 
+# Инициализация БД (автоматически определит PostgreSQL или SQLite)
 db = Database()
 parser = CompetitorParser()
 
-# ========== НАСТРОЙКИ ПОЧТЫ MAIL.RU ==========
-# ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ:
+# ========== НАСТРОЙКИ ПОЧТЫ ==========
 SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
 SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
-SMTP_USER = os.environ.get('SMTP_USER', 'azacazacazggvp@gmail.com')
+SMTP_USER = os.environ.get('SMTP_USER', 'azacazacazggbp@gmail.com')
 SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'xtyo cqmp ggkm veul')
-
 
 def send_email(to_email, subject, body_html):
     """Универсальная функция отправки писем через Gmail"""
     if not SMTP_USER or not SMTP_PASSWORD:
         print("❌ Ошибка: не настроены SMTP_USER или SMTP_PASSWORD")
         return False
-
+    
     try:
         msg = MIMEMultipart()
         msg['From'] = SMTP_USER
         msg['To'] = to_email
         msg['Subject'] = subject
         msg.attach(MIMEText(body_html, 'html', 'utf-8'))
-
+        
         print(f"📧 Подключение к {SMTP_HOST}:{SMTP_PORT}")
         server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
         server.starttls()
@@ -51,7 +50,6 @@ def send_email(to_email, subject, body_html):
     except Exception as e:
         print(f"❌ Ошибка отправки: {e}")
         return False
-
 
 def send_verification_email(to_email, code):
     subject = "Подтверждение регистрации - PriceMonitor"
@@ -69,7 +67,6 @@ def send_verification_email(to_email, code):
     """
     return send_email(to_email, subject, body)
 
-
 # ========== ТЕСТОВЫЙ МАРШРУТ ДЛЯ ПРОВЕРКИ ПОЧТЫ ==========
 @app.route('/test-email')
 def test_email():
@@ -80,14 +77,13 @@ def test_email():
     result = send_email(
         test_email,
         'Тест отправки - PriceMonitor',
-        '<h1>✅ Письмо отправлено!</h1><p>Если вы видите это письмо, Gmail настроен правильно.</p>'
+        '<h1>✅ Письмо отправлено!</h1><p>Если вы видите это письмо, почта настроена правильно.</p>'
     )
     if result:
         return f'✅ Письмо отправлено на {test_email}'
     else:
         return f'❌ Ошибка отправки на {test_email}. Проверьте логи.'
-
-
+        
 @app.route('/demo')
 def demo():
     """Демонстрационная страница с примером работы"""
