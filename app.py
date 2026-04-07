@@ -296,6 +296,7 @@ INDEX_TEMPLATE = '''
     <title>PriceMonitor - Мониторинг цен конкурентов</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0e; color: #e0e0e0; overflow-x: hidden; }
@@ -349,7 +350,6 @@ INDEX_TEMPLATE = '''
         .btn-outline { background: transparent; color: #a0a0b0; border: 1px solid rgba(42,42,53,0.8); }
         .btn-outline:hover { border-color: rgba(74,74,96,0.8); color: #ffffff; transform: translateY(-2px); }
 
-        /* Возможности сервиса - не выделяются */
         .features { padding: 80px 0; border-top: 1px solid rgba(255,255,255,0.05); }
         .features h2 { text-align: center; font-size: 32px; font-weight: 600; margin-bottom: 56px; background: linear-gradient(135deg, #ffffff, #9090b0); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .features-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; }
@@ -386,7 +386,78 @@ INDEX_TEMPLATE = '''
             pointer-events: none;
         }
 
-        /* Тарифы - не выделяются */
+        /* Детальные секции */
+        .detail-section {
+            background: rgba(20,20,26,0.6);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(42,42,53,0.5);
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.5s ease;
+        }
+        .detail-section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .detail-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 16px;
+        }
+        .detail-icon {
+            font-size: 32px;
+        }
+        .detail-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .detail-content {
+            display: flex;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .detail-text {
+            flex: 1;
+            min-width: 250px;
+        }
+        .detail-text p {
+            color: #a0a0b0;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+        .detail-text ul {
+            list-style: none;
+            padding: 0;
+        }
+        .detail-text li {
+            padding: 8px 0;
+            padding-left: 24px;
+            position: relative;
+            color: #c0c0d0;
+        }
+        .detail-text li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #8cd4a0;
+        }
+        .detail-chart {
+            flex: 1;
+            min-width: 300px;
+        }
+        .chart-caption {
+            font-size: 12px;
+            color: #6a6a7a;
+            text-align: center;
+            margin-top: 8px;
+        }
+
         .pricing { padding: 80px 0; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(15,15,18,0.5); backdrop-filter: blur(5px); }
         .pricing h2 { text-align: center; font-size: 32px; font-weight: 600; margin-bottom: 56px; background: linear-gradient(135deg, #ffffff, #9090b0); -webkit-background-clip: text; background-clip: text; color: transparent; }
         .pricing-grid { display: flex; justify-content: center; gap: 32px; flex-wrap: wrap; }
@@ -436,218 +507,12 @@ INDEX_TEMPLATE = '''
 
         .footer { padding: 40px 0; border-top: 1px solid rgba(255,255,255,0.05); text-align: center; font-size: 12px; color: #6a6a7a; }
 
-        /* Модальные окна */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            opacity: 0;
-            transition: opacity 0.4s ease;
-            cursor: pointer;
-        }
-        .modal.show {
-            display: flex;
-            opacity: 1;
-        }
-        .modal-content {
-            cursor: default;
-            background: rgba(20,20,26,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 20px;
-            width: 520px;
-            max-width: 90%;
-            padding: 32px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transform: translateY(20px) scale(0.95);
-            transition: transform 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5);
-            position: relative;
-        }
-        .modal-content h2 { margin-bottom: 24px; text-align: center; color: #fff; }
-        .modal-content input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            background: rgba(15,15,18,0.8);
-            border: 1px solid #2a2a35;
-            border-radius: 8px;
-            color: #fff;
-            box-sizing: border-box;
-            transition: border 0.2s;
-        }
-        .modal-content input:focus { outline: none; border-color: #667eea; }
-        .modal-content button {
-            width: 100%;
-            padding: 12px;
-            background: #2a2a35;
-            color: #fff;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 10px;
-            transition: background 0.2s;
-        }
-        .modal-content button:hover { background: #3a3a48; }
-        .modal-content a {
-            color: #a0a0b0;
-            text-decoration: none;
-            display: block;
-            text-align: center;
-            margin-top: 16px;
-            font-size: 13px;
-            cursor: pointer;
-            transition: color 0.2s;
-        }
-        .modal-content a:hover { color: #fff; }
-        .close-modal {
-            position: absolute;
-            top: 16px;
-            right: 20px;
-            font-size: 28px;
-            cursor: pointer;
-            color: #a0a0b0;
-            transition: color 0.2s;
-        }
-        .close-modal:hover { color: #fff; }
-
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: rgba(20,20,26,0.95);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 16px 24px;
-            min-width: 280px;
-            border-left: 4px solid;
-            z-index: 1100;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.3);
-        }
-        .toast.show { transform: translateX(0); }
-        .toast.error { border-left-color: #f56565; }
-        .toast.success { border-left-color: #8cd4a0; }
-        .toast.warning { border-left-color: #ecc94b; }
-        .toast-content { display: flex; justify-content: space-between; align-items: center; }
-        .toast-message { color: #fff; font-size: 14px; }
-        .toast-close { cursor: pointer; color: #a0a0b0; font-size: 20px; margin-left: 15px; transition: color 0.2s; }
-        .toast-close:hover { color: #fff; }
-
-        .demo-features {
-            display: flex;
-            justify-content: space-around;
-            gap: 16px;
-            margin: 20px 0;
-        }
-        .demo-feature {
-            flex: 1;
-            text-align: center;
-            padding: 16px;
-            background: rgba(26,26,36,0.5);
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            user-select: none;
-        }
-        .demo-feature:hover {
-            transform: translateY(-5px);
-            background: rgba(30,30,42,0.7);
-        }
-        .demo-feature-icon {
-            margin-bottom: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .demo-feature-title {
-            font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 4px;
-            color: #e0e0e0;
-        }
-        .demo-feature-desc {
-            font-size: 11px;
-            color: #a0a0b0;
-        }
-
-        .demo-products {
-            margin: 16px 0;
-        }
-        .demo-product-card {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            padding: 12px;
-            background: rgba(26,26,36,0.6);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            user-select: none;
-            border: 1px solid rgba(42,42,53,0.3);
-        }
-        .demo-product-card:hover {
-            transform: translateX(5px);
-            background: rgba(30,30,42,0.8);
-            border-color: rgba(74,74,96,0.6);
-        }
-        .demo-product-image {
-            width: 55px;
-            height: 55px;
-            background-size: cover;
-            background-position: center;
-            border-radius: 10px;
-            transition: transform 0.3s ease;
-        }
-        .demo-product-card:hover .demo-product-image {
-            transform: scale(1.05);
-        }
-        .demo-product-info {
-            flex: 1;
-        }
-        .demo-product-title {
-            font-weight: 600;
-            font-size: 15px;
-            margin-bottom: 5px;
-            color: #e0e0e0;
-        }
-        .demo-product-price {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-bottom: 4px;
-        }
-        .current-price {
-            color: #8cd4a0;
-            font-weight: 600;
-            font-size: 16px;
-        }
-        .old-price {
-            color: #a0a0a0;
-            text-decoration: line-through;
-            font-size: 13px;
-        }
-        .demo-product-change {
-            font-size: 11px;
-            color: #8cd4a0;
-        }
-
         @media (max-width: 768px) {
             .hero h1 { font-size: 36px; }
             .hero p { font-size: 16px; }
             .features-grid { grid-template-columns: 1fr; }
             .nav a { margin-left: 16px; }
-            .demo-features { flex-direction: column; }
+            .detail-content { flex-direction: column; }
         }
     </style>
 </head>
@@ -680,25 +545,149 @@ INDEX_TEMPLATE = '''
         <div class="features">
             <h2>Возможности сервиса</h2>
             <div class="features-grid">
-                <div class="feature" onclick="openRegisterModal()">
+                <div class="feature" data-section="monitoring-detail">
                     <div class="feature-icon">◈</div>
                     <h3>Мониторинг 24/7</h3>
                     <p>Автоматическое отслеживание цен конкурентов в реальном времени</p>
                 </div>
-                <div class="feature" onclick="openRegisterModal()">
+                <div class="feature" data-section="ai-detail">
                     <div class="feature-icon">◇</div>
                     <h3>AI рекомендации</h3>
                     <p>Умные советы по оптимальной цене на основе анализа рынка</p>
                 </div>
-                <div class="feature" onclick="openRegisterModal()">
+                <div class="feature" data-section="telegram-detail">
                     <div class="feature-icon">◎</div>
                     <h3>Telegram бот</h3>
                     <p>Мгновенные уведомления об изменении цен конкурентов</p>
                 </div>
-                <div class="feature" onclick="openRegisterModal()">
+                <div class="feature" data-section="analytics-detail">
                     <div class="feature-icon">○</div>
                     <h3>Детальная аналитика</h3>
                     <p>Графики и отчёты для принятия решений</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Подробные секции -->
+        <div id="monitoring-detail" class="detail-section">
+            <div class="detail-header">
+                <div class="detail-icon">◈</div>
+                <h2>Мониторинг 24/7</h2>
+            </div>
+            <div class="detail-content">
+                <div class="detail-text">
+                    <p>Наш сервис автоматически отслеживает цены конкурентов в реальном времени. Вы получаете актуальные данные без необходимости ручной проверки.</p>
+                    <ul>
+                        <li>Автоматический парсинг цен каждые 15 минут</li>
+                        <li>Отслеживание изменений на Wildberries, Ozon и Avito</li>
+                        <li>Мгновенные уведомления о снижении цен</li>
+                        <li>История изменений за 30 дней</li>
+                    </ul>
+                </div>
+                <div class="detail-chart">
+                    <canvas id="priceChart" width="400" height="200" style="background: rgba(26,26,36,0.6); border-radius: 12px; padding: 10px;"></canvas>
+                    <p class="chart-caption">Пример графика изменения цены конкурента за неделю</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="ai-detail" class="detail-section">
+            <div class="detail-header">
+                <div class="detail-icon">◇</div>
+                <h2>AI рекомендации по ценам</h2>
+            </div>
+            <div class="detail-content">
+                <div class="detail-text">
+                    <p>Искусственный интеллект анализирует рынок и даёт персональные рекомендации по оптимальной цене для максимальной прибыли.</p>
+                    <ul>
+                        <li>Анализ эластичности спроса</li>
+                        <li>Прогноз оптимальной цены на основе конкурентов</li>
+                        <li>Советы по сезонным колебаниям</li>
+                        <li>Автоматическое определение лучшего времени для повышения цены</li>
+                    </ul>
+                </div>
+                <div class="detail-chart">
+                    <div style="background: #1a1a24; border-radius: 16px; padding: 20px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                            <div>
+                                <div style="color: #8a8a9a; font-size: 12px;">Текущая цена конкурента</div>
+                                <div style="font-size: 24px; color: #f0a0a0;">94 990 ₽</div>
+                            </div>
+                            <div style="font-size: 24px;">→</div>
+                            <div>
+                                <div style="color: #8a8a9a; font-size: 12px;">Рекомендуемая цена</div>
+                                <div style="font-size: 28px; color: #8cd4a0;">89 990 ₽</div>
+                            </div>
+                        </div>
+                        <div style="background: #2a2a4a; padding: 12px; border-radius: 8px; text-align: center;">
+                            💡 AI совет: Снизьте цену на 5% для захвата лидерства
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="telegram-detail" class="detail-section">
+            <div class="detail-header">
+                <div class="detail-icon">◎</div>
+                <h2>Telegram уведомления</h2>
+            </div>
+            <div class="detail-content">
+                <div class="detail-text">
+                    <p>Получайте мгновенные уведомления об изменении цен прямо в Telegram. Ничего не пропустите!</p>
+                    <ul>
+                        <li>Мгновенные оповещения о снижении цен конкурентов</li>
+                        <li>Ежедневные и еженедельные отчёты</li>
+                        <li>Уведомления о достижении целевой цены</li>
+                        <li>Персональные рекомендации от AI</li>
+                    </ul>
+                </div>
+                <div class="detail-chart">
+                    <div style="background: #1a1a24; border-radius: 16px; padding: 16px; max-width: 300px; margin: 0 auto;">
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div style="width: 40px; height: 40px; background: #2a2a4a; border-radius: 50%; display: flex; align-items: center; justify-content: center;">🤖</div>
+                            <div><strong>PriceMonitor Bot</strong><br><span style="font-size: 11px; color: #8a8a9a;">только что</span></div>
+                        </div>
+                        <div style="background: #0f0f12; border-radius: 12px; padding: 12px;">
+                            📉 <strong>Изменение цены!</strong><br>
+                            iPhone 15 Pro: 94 990 ₽ → 89 990 ₽<br>
+                            <span style="font-size: 11px; color: #8cd4a0;">Снижение на 5 000 ₽</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="analytics-detail" class="detail-section">
+            <div class="detail-header">
+                <div class="detail-icon">○</div>
+                <h2>Детальная аналитика</h2>
+            </div>
+            <div class="detail-content">
+                <div class="detail-text">
+                    <p>Подробные отчёты и аналитика для принятия обоснованных решений.</p>
+                    <ul>
+                        <li>Экспорт отчётов в Excel/CSV</li>
+                        <li>Графики динамики цен</li>
+                        <li>Сравнение с конкурентами</li>
+                        <li>Прогнозы на основе исторических данных</li>
+                    </ul>
+                </div>
+                <div class="detail-chart">
+                    <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                        <div style="background: #1a1a24; padding: 15px; border-radius: 12px; text-align: center; flex: 1;">
+                            <div style="font-size: 28px; color: #8cd4a0;">-15%</div>
+                            <div style="font-size: 11px; color: #8a8a9a;">Среднее снижение</div>
+                        </div>
+                        <div style="background: #1a1a24; padding: 15px; border-radius: 12px; text-align: center; flex: 1;">
+                            <div style="font-size: 28px; color: #8cd4a0;">24/7</div>
+                            <div style="font-size: 11px; color: #8a8a9a;">Мониторинг</div>
+                        </div>
+                        <div style="background: #1a1a24; padding: 15px; border-radius: 12px; text-align: center; flex: 1;">
+                            <div style="font-size: 28px; color: #8cd4a0;">30д</div>
+                            <div style="font-size: 11px; color: #8a8a9a;">История</div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -744,140 +733,73 @@ INDEX_TEMPLATE = '''
     </div>
 
     <!-- Модальные окна -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content" style="width: 400px;">
-            <span class="close-modal" onclick="closeLoginModal()">&times;</span>
-            <h2>Вход в аккаунт</h2>
+    <div id="loginModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:400px;">
+            <span onclick="closeLoginModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
+            <h2 style="margin-bottom:24px;">Вход в аккаунт</h2>
             <form id="loginForm">
-                <input type="email" id="loginEmail" placeholder="Email" required>
-                <input type="password" id="loginPassword" placeholder="Пароль" required>
-                <button type="submit">Войти</button>
+                <input type="email" id="loginEmail" placeholder="Email" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
+                <input type="password" id="loginPassword" placeholder="Пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
+                <button type="submit" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Войти</button>
             </form>
-            <a onclick="closeLoginModal(); openRegisterModal()">Нет аккаунта? Зарегистрироваться</a>
-            <a onclick="closeLoginModal(); openForgotModal()">Забыли пароль?</a>
+            <a onclick="closeLoginModal(); openRegisterModal()" style="display:block; text-align:center; margin-top:16px; color:#a0a0b0; cursor:pointer;">Нет аккаунта? Зарегистрироваться</a>
+            <a onclick="closeLoginModal(); openForgotModal()" style="display:block; text-align:center; margin-top:8px; color:#a0a0b0; cursor:pointer;">Забыли пароль?</a>
         </div>
     </div>
 
-    <div id="registerModal" class="modal">
-        <div class="modal-content" style="width: 400px;">
-            <span class="close-modal" onclick="closeRegisterModal()">&times;</span>
-            <h2>Регистрация</h2>
+    <div id="registerModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:400px;">
+            <span onclick="closeRegisterModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
+            <h2 style="margin-bottom:24px;">Регистрация</h2>
             <form id="registerForm">
-                <input type="text" id="regName" placeholder="Имя">
-                <input type="email" id="regEmail" placeholder="Email" required>
-                <input type="tel" id="regPhone" placeholder="Телефон">
-                <input type="password" id="regPassword" placeholder="Пароль" required>
-                <input type="password" id="regConfirm" placeholder="Подтвердите пароль" required>
-                <button type="submit">Зарегистрироваться</button>
+                <input type="text" id="regName" placeholder="Имя" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
+                <input type="email" id="regEmail" placeholder="Email" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;" required>
+                <input type="tel" id="regPhone" placeholder="Телефон" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
+                <input type="password" id="regPassword" placeholder="Пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;" required>
+                <input type="password" id="regConfirm" placeholder="Подтвердите пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;" required>
+                <button type="submit" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Зарегистрироваться</button>
             </form>
-            <a onclick="closeRegisterModal(); openLoginModal()">Уже есть аккаунт? Войти</a>
+            <a onclick="closeRegisterModal(); openLoginModal()" style="display:block; text-align:center; margin-top:16px; color:#a0a0b0; cursor:pointer;">Уже есть аккаунт? Войти</a>
         </div>
     </div>
 
-    <div id="forgotModal" class="modal">
-        <div class="modal-content" style="width: 400px;">
-            <span class="close-modal" onclick="closeForgotModal()">&times;</span>
-            <h2>Восстановление пароля</h2>
+    <div id="forgotModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:400px;">
+            <span onclick="closeForgotModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
+            <h2 style="margin-bottom:24px;">Восстановление пароля</h2>
             <form id="forgotForm">
-                <input type="email" id="forgotEmail" placeholder="Email" required>
-                <button type="submit">Отправить код</button>
+                <input type="email" id="forgotEmail" placeholder="Email" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;" required>
+                <button type="submit" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Отправить код</button>
             </form>
-            <a onclick="closeForgotModal(); openLoginModal()">Вернуться ко входу</a>
+            <a onclick="closeForgotModal(); openLoginModal()" style="display:block; text-align:center; margin-top:16px; color:#a0a0b0; cursor:pointer;">Вернуться ко входу</a>
         </div>
     </div>
 
-    <div id="resetCodeModal" class="modal">
-        <div class="modal-content" style="width: 400px;">
-            <span class="close-modal" onclick="closeResetCodeModal()">&times;</span>
-            <h2>Введите код</h2>
+    <div id="resetCodeModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:400px;">
+            <span onclick="closeResetCodeModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
+            <h2 style="margin-bottom:24px;">Введите код</h2>
             <p style="color:#a0a0b0; text-align:center; margin-bottom:15px">Код отправлен на email</p>
             <form id="resetCodeForm">
-                <input type="text" id="resetCode" placeholder="Код из письма" maxlength="6">
-                <input type="password" id="newPassword" placeholder="Новый пароль">
-                <input type="password" id="confirmNewPassword" placeholder="Подтвердите пароль">
-                <button type="submit">Сбросить пароль</button>
+                <input type="text" id="resetCode" placeholder="Код из письма" maxlength="6" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff; text-align:center; font-size:20px;">
+                <input type="password" id="newPassword" placeholder="Новый пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
+                <input type="password" id="confirmNewPassword" placeholder="Подтвердите пароль" style="width:100%; padding:12px; margin:10px 0; background:#0f0f12; border:1px solid #2a2a35; border-radius:8px; color:#fff;">
+                <button type="submit" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Сбросить пароль</button>
             </form>
         </div>
     </div>
 
-    <div id="demoModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeDemoModal()">&times;</span>
-            <h2>Демо-режим</h2>
-
-            <div class="demo-features">
-                <div class="demo-feature" onclick="openRegisterModal(); closeDemoModal();">
-                    <div class="demo-feature-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8cd4a0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"/>
-                            <path d="M12 6v6l4 2"/>
-                        </svg>
-                    </div>
-                    <div class="demo-feature-title">Реальные цены</div>
-                    <div class="demo-feature-desc">Avito, Ozon, WB</div>
-                </div>
-                <div class="demo-feature" onclick="openRegisterModal(); closeDemoModal();">
-                    <div class="demo-feature-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8cd4a0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 3v18h18"/>
-                            <path d="M18 17V9"/>
-                            <path d="M12 17V5"/>
-                            <path d="M6 17v-3"/>
-                        </svg>
-                    </div>
-                    <div class="demo-feature-title">История изменений</div>
-                    <div class="demo-feature-desc">Графики и тренды</div>
-                </div>
-                <div class="demo-feature" onclick="openRegisterModal(); closeDemoModal();">
-                    <div class="demo-feature-icon">
-                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#8cd4a0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2a10 10 0 0 1 10 10c0 5-3 9-10 9-4 0-7-2-9-5"/>
-                            <path d="M12 8v4l3 3"/>
-                            <path d="M5 3v4h4"/>
-                        </svg>
-                    </div>
-                    <div class="demo-feature-title">AI рекомендации</div>
-                    <div class="demo-feature-desc">Оптимальная цена</div>
-                </div>
+    <div id="demoModal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(8px); justify-content:center; align-items:center; z-index:1000;">
+        <div style="background:rgba(20,20,26,0.95); border-radius:20px; padding:32px; width:500px;">
+            <span onclick="closeDemoModal()" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
+            <h2 style="margin-bottom:24px;">Демо-режим</h2>
+            <p>Примеры мониторинга цен:</p>
+            <div style="background:#1a1a24; border-radius:12px; padding:12px; margin:12px 0;">
+                <div><strong>Avito:</strong> iPhone 15 Pro - 89 990 ₽</div>
+                <div><strong>Ozon:</strong> Samsung S24 Ultra - 112 490 ₽</div>
+                <div><strong>Wildberries:</strong> AirPods Pro 2 - 24 990 ₽</div>
             </div>
-
-            <div class="demo-products">
-                <div class="demo-product-card" onclick="openRegisterModal(); closeDemoModal();">
-                    <div class="demo-product-image" style="background-image: url('https://www.apple.com/newsroom/images/product/iphone/standard/iPhone_15_Pro_hero_091223.jpg');"></div>
-                    <div class="demo-product-info">
-                        <div class="demo-product-title">iPhone 15 Pro</div>
-                        <div class="demo-product-price">
-                            <span class="current-price">89 990 ₽</span>
-                            <span class="old-price">94 990 ₽</span>
-                        </div>
-                        <div class="demo-product-change">Снижение на 5 000 ₽</div>
-                    </div>
-                </div>
-                <div class="demo-product-card" onclick="openRegisterModal(); closeDemoModal();">
-                    <div class="demo-product-image" style="background-image: url('https://image-us.samsung.com/SamsungUS/home/mobile/phones/galaxy-s24-ultra/S24_Ultra_Graphite_Hero_240131.jpg');"></div>
-                    <div class="demo-product-info">
-                        <div class="demo-product-title">Samsung S24 Ultra</div>
-                        <div class="demo-product-price">
-                            <span class="current-price">112 490 ₽</span>
-                            <span class="old-price">109 990 ₽</span>
-                        </div>
-                        <div class="demo-product-change">Повышение на 2 500 ₽</div>
-                    </div>
-                </div>
-                <div class="demo-product-card" onclick="openRegisterModal(); closeDemoModal();">
-                    <div class="demo-product-image" style="background-image: url('https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-pro-2-hero?wid=940&hei=940&fmt=jpeg&qlt=90&.v=1661209562052');"></div>
-                    <div class="demo-product-info">
-                        <div class="demo-product-title">AirPods Pro 2</div>
-                        <div class="demo-product-price">
-                            <span class="current-price">24 990 ₽</span>
-                            <span class="old-price">27 990 ₽</span>
-                        </div>
-                        <div class="demo-product-change">Снижение на 3 000 ₽</div>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="closeDemoModal(); openRegisterModal()" class="btn btn-primary" style="width:100%">Начать отслеживать</button>
+            <button onclick="closeDemoModal(); openRegisterModal()" style="width:100%; padding:12px; background:#2a2a35; color:#fff; border:none; border-radius:8px; cursor:pointer;">Начать отслеживать</button>
         </div>
     </div>
 
@@ -913,46 +835,64 @@ INDEX_TEMPLATE = '''
             }, 4000);
         }
 
-        function openModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
+        // Скролл к секциям
+        function scrollToSection(sectionId) {
+            const element = document.getElementById(sectionId);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => {
+                    element.classList.add('visible');
+                }, 100);
+            }
         }
 
-        function closeModal(modalId) {
-            const modal = document.getElementById(modalId);
-            modal.classList.remove('show');
-            setTimeout(() => modal.style.display = 'none', 400);
-        }
+        // Обработчики кликов на иконках
+        document.querySelectorAll('.feature').forEach((feature, index) => {
+            const sections = ['monitoring-detail', 'ai-detail', 'telegram-detail', 'analytics-detail'];
+            feature.addEventListener('click', () => {
+                scrollToSection(sections[index]);
+            });
+        });
 
-        function setupModalCloseOnBackground() {
-            const modals = ['loginModal', 'registerModal', 'forgotModal', 'resetCodeModal', 'demoModal'];
-            modals.forEach(modalId => {
-                const modal = document.getElementById(modalId);
-                if (modal) {
-                    modal.addEventListener('click', function(e) {
-                        if (e.target === modal) {
-                            closeModal(modalId);
-                        }
-                    });
+        // График
+        const ctx = document.getElementById('priceChart')?.getContext('2d');
+        if (ctx) {
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
+                    datasets: [{
+                        label: 'Цена конкурента',
+                        data: [94990, 93990, 92990, 91990, 90990, 89990, 89990],
+                        borderColor: '#8cd4a0',
+                        backgroundColor: 'rgba(140,212,160,0.1)',
+                        fill: true,
+                        tension: 0.3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: { legend: { labels: { color: '#e0e0e0' } } },
+                    scales: { y: { ticks: { color: '#a0a0b0' } }, x: { ticks: { color: '#a0a0b0' } } }
                 }
             });
         }
 
-        function openLoginModal() { openModal('loginModal'); }
-        function closeLoginModal() { closeModal('loginModal'); }
-        function openRegisterModal() { openModal('registerModal'); }
-        function closeRegisterModal() { closeModal('registerModal'); }
-        function openForgotModal() { openModal('forgotModal'); }
-        function closeForgotModal() { closeModal('forgotModal'); }
-        function openResetCodeModal() { openModal('resetCodeModal'); }
-        function closeResetCodeModal() { closeModal('resetCodeModal'); }
-        function openDemoModal() { openModal('demoModal'); }
-        function closeDemoModal() { closeModal('demoModal'); }
+        // Модальные окна
+        function openLoginModal() { document.getElementById('loginModal').style.display = 'flex'; }
+        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+        function openRegisterModal() { document.getElementById('registerModal').style.display = 'flex'; }
+        function closeRegisterModal() { document.getElementById('registerModal').style.display = 'none'; }
+        function openForgotModal() { document.getElementById('forgotModal').style.display = 'flex'; }
+        function closeForgotModal() { document.getElementById('forgotModal').style.display = 'none'; }
+        function openResetCodeModal() { document.getElementById('resetCodeModal').style.display = 'flex'; }
+        function closeResetCodeModal() { document.getElementById('resetCodeModal').style.display = 'none'; }
+        function openDemoModal() { document.getElementById('demoModal').style.display = 'flex'; }
+        function closeDemoModal() { document.getElementById('demoModal').style.display = 'none'; }
 
-        document.addEventListener('DOMContentLoaded', setupModalCloseOnBackground);
-
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        // Формы
+        document.getElementById('loginForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
@@ -972,7 +912,7 @@ INDEX_TEMPLATE = '''
             } catch(e) { showToast('Ошибка подключения', 'error'); }
         });
 
-        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('regName').value;
             const email = document.getElementById('regEmail').value;
@@ -995,26 +935,31 @@ INDEX_TEMPLATE = '''
             }
         });
 
-        document.getElementById('forgotForm').addEventListener('submit', async (e) => {
+        document.getElementById('forgotForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('forgotEmail').value;
-            const res = await fetch('/api/forgot-password', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
-            });
-            const data = await res.json();
-            if (data.success) {
-                showToast('Код отправлен на почту', 'success');
-                closeForgotModal();
-                openResetCodeModal();
-                window.resetEmail = email;
-            } else {
-                showToast(data.error, 'error');
+            if (!email) { showToast('Введите email', 'error'); return; }
+            showToast('Отправка кода...', 'warning');
+            try {
+                const res = await fetch('/api/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: email })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Код отправлен на почту', 'success');
+                    closeForgotModal();
+                    setTimeout(() => { openResetCodeModal(); window.resetEmail = email; }, 500);
+                } else {
+                    showToast(data.error || 'Ошибка отправки', 'error');
+                }
+            } catch (error) {
+                showToast('Ошибка подключения к серверу', 'error');
             }
         });
 
-        document.getElementById('resetCodeForm').addEventListener('submit', async (e) => {
+        document.getElementById('resetCodeForm')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             const code = document.getElementById('resetCode').value;
             const newPassword = document.getElementById('newPassword').value;
