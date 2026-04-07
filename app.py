@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template_string, request, redirect, url_for, session, jsonify, send_file
 from functools import wraps
 from datetime import datetime
@@ -9,6 +10,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from datetime import datetime, timedelta
+
 # ========== ИНИЦИАЛИЗАЦИЯ ==========
 app = Flask(__name__)
 app.secret_key = secrets.token_hex(32)
@@ -18,10 +20,37 @@ parser = CompetitorParser()
 
 # ========== НАСТРОЙКИ ПОЧТЫ MAIL.RU ==========
 # ЗАМЕНИТЕ НА ВАШИ ДАННЫЕ:
-SMTP_HOST = "smtp.mail.ru"
-SMTP_PORT = 587
-SMTP_USER = "pricemonitor11@mail.ru"  # ВАШ EMAIL
-SMTP_PASSWORD = "awBm0vm6PpkVTLjTQUcr"  # ПАРОЛЬ ПРИЛОЖЕНИЯ
+SMTP_HOST = os.environ.get('SMTP_HOST', 'smtp.gmail.com')
+SMTP_PORT = int(os.environ.get('SMTP_PORT', 587))
+SMTP_USER = os.environ.get('SMTP_USER', 'azacazacazggvp@gmail.com')
+SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', 'xtyo cqmp ggkm veul')
+
+
+def send_email(to_email, subject, body_html):
+    """Универсальная функция отправки писем через Gmail"""
+    if not SMTP_USER or not SMTP_PASSWORD:
+        print("❌ Ошибка: не настроены SMTP_USER или SMTP_PASSWORD")
+        return False
+
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = SMTP_USER
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body_html, 'html', 'utf-8'))
+
+        print(f"📧 Подключение к {SMTP_HOST}:{SMTP_PORT}")
+        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
+        server.starttls()
+        print(f"📧 Логин: {SMTP_USER}")
+        server.login(SMTP_USER, SMTP_PASSWORD)
+        server.send_message(msg)
+        server.quit()
+        print(f"✅ Письмо успешно отправлено на {to_email}")
+        return True
+    except Exception as e:
+        print(f"❌ Ошибка отправки: {e}")
+        return False
 
 
 def send_verification_email(to_email, code):
@@ -38,22 +67,25 @@ def send_verification_email(to_email, code):
     </body>
     </html>
     """
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = SMTP_USER
-        msg['To'] = to_email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'html', 'utf-8'))
-        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.send_message(msg)
-        server.quit()
-        print(f"Письмо отправлено на {to_email}")
-        return True
-    except Exception as e:
-        print(f"Ошибка отправки: {e}")
-        return False
+    return send_email(to_email, subject, body)
+
+
+# ========== ТЕСТОВЫЙ МАРШРУТ ДЛЯ ПРОВЕРКИ ПОЧТЫ ==========
+@app.route('/test-email')
+def test_email():
+    """Тестовый маршрут для проверки отправки писем"""
+    test_email = request.args.get('email', SMTP_USER)
+    if not test_email:
+        return '❌ Укажите email в параметре: ?email=your@email.com'
+    result = send_email(
+        test_email,
+        'Тест отправки - PriceMonitor',
+        '<h1>✅ Письмо отправлено!</h1><p>Если вы видите это письмо, Gmail настроен правильно.</p>'
+    )
+    if result:
+        return f'✅ Письмо отправлено на {test_email}'
+    else:
+        return f'❌ Ошибка отправки на {test_email}. Проверьте логи.'
 
 
 @app.route('/demo')
@@ -215,6 +247,7 @@ def demo():
     </html>
     '''
 
+
 # ========== ГЛАВНАЯ СТРАНИЦА С ДИНАМИЧЕСКИМ ФОНОМ ==========
 INDEX_TEMPLATE = '''
 <!DOCTYPE html>
@@ -345,7 +378,7 @@ INDEX_TEMPLATE = '''
         .detail-text li::before { content: "✓"; position: absolute; left: 0; color: #8cd4a0; }
         .detail-chart { flex: 1; min-width: 300px; width: 100%; overflow-x: auto; pointer-events: auto; }
         .chart-caption { font-size: 12px; color: #6a6a7a; text-align: center; margin-top: 8px; }
-        
+
         #priceChart { width: 100% !important; height: auto !important; max-width: 100%; background: rgba(26,26,36,0.6); border-radius: 12px; padding: 10px; }
         canvas { max-width: 100%; height: auto; }
 
@@ -508,7 +541,7 @@ INDEX_TEMPLATE = '''
             .toast-message { font-size: 12px; }
             .footer { padding: 30px 0; font-size: 10px; }
         }
-        
+
         @media (max-width: 480px) {
             .hero h1 { font-size: 24px; }
             .btn { width: 180px; padding: 8px 16px; }
@@ -518,7 +551,7 @@ INDEX_TEMPLATE = '''
             .modal-content { padding: 20px; }
             .demo-product-image { width: 60px; height: 60px; }
         }
-        
+
         @media (min-width: 769px) and (max-width: 1024px) {
             .features-grid { grid-template-columns: repeat(2, 1fr); gap: 20px; }
             .pricing-grid { gap: 20px; }
@@ -829,14 +862,14 @@ INDEX_TEMPLATE = '''
             window.scrollToSection = function(sectionId) {
                 const element = document.getElementById(sectionId);
                 if (!element) return;
-                
+
                 const elementPosition = element.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - (window.innerHeight / 2) + (element.offsetHeight / 2);
                 const startPosition = window.pageYOffset;
                 const distance = offsetPosition - startPosition;
                 const duration = 1200;
                 let startTime = null;
-                
+
                 function animation(currentTime) {
                     if (startTime === null) startTime = currentTime;
                     const timeElapsed = currentTime - startTime;
@@ -1331,7 +1364,6 @@ VERIFY_TEMPLATE = '''
 </html>
 '''
 
-
 LOGIN_TEMPLATE = '''
 <!DOCTYPE html>
 <html>
@@ -1402,21 +1434,17 @@ REGISTER_TEMPLATE = '''
 '''
 
 
-# ========== МАРШРУТЫ ==========
 def login_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if 'user_id' not in session:
             return redirect(url_for('login'))
         return f(*args, **kwargs)
-
     return decorated
-
 
 @app.route('/')
 def index():
     return render_template_string(INDEX_TEMPLATE)
-
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -1438,20 +1466,15 @@ def register():
             session['temp_email'] = email
             return redirect(url_for('verify_email'))
         return f'Ошибка: {code}'
-
     return render_template_string(REGISTER_TEMPLATE)
-
 
 @app.route('/verify-email', methods=['GET', 'POST'])
 def verify_email():
     if 'temp_email' not in session:
         return redirect(url_for('register'))
-
     email = session['temp_email']
-
     if request.method == 'POST':
         code = request.form['code']
-
         if db.verify_email(email, code):
             session.pop('temp_email', None)
             conn = db.conn
@@ -1463,9 +1486,7 @@ def verify_email():
             return redirect(url_for('dashboard'))
         else:
             return render_template_string(VERIFY_TEMPLATE, email=email, error="Неверный код")
-
     return render_template_string(VERIFY_TEMPLATE, email=email)
-
 
 @app.route('/resend-code')
 def resend_code():
@@ -1479,7 +1500,6 @@ def resend_code():
             send_verification_email(email, result[0])
     return redirect(url_for('verify_email'))
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -1491,21 +1511,17 @@ def login():
             session['email'] = user['email']
             return redirect(url_for('dashboard'))
         return f'Ошибка: {error}'
-
     return render_template_string(LOGIN_TEMPLATE)
-
 
 @app.route('/logout')
 def logout():
     session.clear()
     return redirect(url_for('index'))
 
-
 @app.route('/dashboard')
 @login_required
 def dashboard():
     return render_template_string(DASHBOARD_TEMPLATE, email=session['email'])
-
 
 @app.route('/api/parse', methods=['POST'])
 @login_required
@@ -1513,37 +1529,28 @@ def api_parse():
     data = request.json
     platform = data.get('platform')
     url = data.get('url')
-
     if not url:
         return jsonify({'error': 'Введите ссылку'}), 400
-
     can_access, reason = db.can_make_request(session['user_id'])
     if not can_access:
         return jsonify({'error': reason}), 403
-
     result = parser.parse(platform, url)
-
     if result and result.get('price'):
         db.use_request(session['user_id'])
         return jsonify(result)
-
     return jsonify({'error': 'Не удалось найти цену'}), 404
-
 
 @app.route('/api/competitors', methods=['GET'])
 @login_required
 def api_get_competitors():
     return jsonify(db.get_competitors(session['user_id']))
 
-
 @app.route('/api/competitors', methods=['POST'])
 @login_required
 def api_add_competitor():
     data = request.json
-    comp_id = db.add_competitor(session['user_id'], data['name'], data['platform'], data['url'],
-                                data.get('my_price', 0))
+    comp_id = db.add_competitor(session['user_id'], data['name'], data['platform'], data['url'], data.get('my_price', 0))
     return jsonify({'id': comp_id})
-
 
 @app.route('/api/competitors/<int:comp_id>', methods=['DELETE'])
 @login_required
@@ -1551,12 +1558,10 @@ def api_delete_competitor(comp_id):
     db.delete_competitor(comp_id, session['user_id'])
     return jsonify({'status': 'ok'})
 
-
 @app.route('/api/history')
 @login_required
 def api_history():
     return jsonify(db.get_history(session['user_id']))
-
 
 @app.route('/api/stats')
 @login_required
@@ -1571,12 +1576,10 @@ def api_stats():
             stats['requests_left'] = 0
     return jsonify(stats)
 
-
 @app.route('/api/profile', methods=['GET'])
 @login_required
 def api_profile():
     return jsonify(db.get_user_profile(session['user_id']))
-
 
 @app.route('/api/profile', methods=['PUT'])
 @login_required
@@ -1585,27 +1588,21 @@ def api_update_profile():
     db.update_profile(session['user_id'], data.get('full_name'), data.get('phone'))
     return jsonify({'status': 'ok'})
 
-
 @app.route('/api/export/excel')
 @login_required
 def export_excel():
-    import io
-    import csv
-
+    import io, csv
     history = db.get_history(session['user_id'])
-
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(['Дата', 'Конкурент', 'Платформа', 'Цена'])
     for h in history:
         writer.writerow([h['date'], h['name'], h['platform'], h['price']])
-
     response = output.getvalue()
     return response, 200, {
         'Content-Type': 'text/csv; charset=utf-8',
         'Content-Disposition': f'attachment; filename=price_report_{datetime.now().strftime("%Y%m%d_%H%M%S")}.csv'
     }
-
 
 @app.route('/api/login', methods=['POST'])
 def api_login():
@@ -1619,7 +1616,6 @@ def api_login():
         return jsonify({'success': True})
     return jsonify({'success': False, 'error': error}), 401
 
-
 @app.route('/api/register', methods=['POST'])
 def api_register():
     data = request.json
@@ -1627,54 +1623,32 @@ def api_register():
     password = data.get('password')
     name = data.get('name', '')
     phone = data.get('phone', '')
-
     user_id, code = db.register_user(email, password, name, phone)
     if user_id:
         send_verification_email(email, code)
         return jsonify({'success': True})
     return jsonify({'success': False, 'error': code}), 400
 
-
 @app.route('/api/forgot-password', methods=['POST'])
 def api_forgot_password():
     data = request.json
     email = data.get('email')
-
     import random
     reset_code = ''.join(random.choices('0123456789', k=6))
     expires_at = datetime.now() + timedelta(minutes=15)
-
     conn = db.conn
     cursor = conn.cursor()
     cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
     user = cursor.fetchone()
-
     if not user:
         return jsonify({'success': False, 'error': 'Email не найден'}), 404
-
     cursor.execute('UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE id = ?',
                    (reset_code, expires_at, user[0]))
     conn.commit()
-
-    # Отправка письма
     subject = "Восстановление пароля - PriceMonitor"
-    body = f"Ваш код: {reset_code}"
-    try:
-        msg = MIMEMultipart()
-        msg['From'] = SMTP_USER
-        msg['To'] = email
-        msg['Subject'] = subject
-        msg.attach(MIMEText(body, 'plain', 'utf-8'))
-        server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-        server.starttls()
-        server.login(SMTP_USER, SMTP_PASSWORD)
-        server.send_message(msg)
-        server.quit()
-    except Exception as e:
-        print(f"Ошибка: {e}")
-
+    body = f"<h2>Ваш код: {reset_code}</h2><p>Код действителен 15 минут.</p>"
+    send_email(email, subject, body)
     return jsonify({'success': True})
-
 
 @app.route('/api/reset-password', methods=['POST'])
 def api_reset_password():
@@ -1682,215 +1656,79 @@ def api_reset_password():
     email = data.get('email')
     code = data.get('code')
     new_password = data.get('new_password')
-
     conn = db.conn
     cursor = conn.cursor()
     cursor.execute('SELECT id, reset_code, reset_code_expires FROM users WHERE email = ?', (email,))
     user = cursor.fetchone()
-
     if not user:
         return jsonify({'success': False, 'error': 'Пользователь не найден'}), 404
-
     if user[1] != code:
         return jsonify({'success': False, 'error': 'Неверный код'}), 400
-
-    if user[2]:
-        try:
-            expires = datetime.strptime(user[2], '%Y-%m-%d %H:%M:%S.%f')
-            if datetime.now() > expires:
-                return jsonify({'success': False, 'error': 'Код истёк'}), 400
-        except:
-            pass
-
     salt = secrets.token_hex(16)
     password_hash = hashlib.pbkdf2_hmac('sha256', new_password.encode(), salt.encode(), 100000).hex()
-
-    cursor.execute(
-        'UPDATE users SET password_hash = ?, salt = ?, reset_code = NULL, reset_code_expires = NULL WHERE id = ?',
-        (password_hash, salt, user[0]))
+    cursor.execute('UPDATE users SET password_hash = ?, salt = ?, reset_code = NULL, reset_code_expires = NULL WHERE id = ?',
+                   (password_hash, salt, user[0]))
     conn.commit()
-
     return jsonify({'success': True})
 
 @app.route('/forgot-password', methods=['GET', 'POST'])
 def forgot_password():
     if request.method == 'POST':
         email = request.form['email']
-
-        # Проверяем, существует ли пользователь
         conn = db.conn
         cursor = conn.cursor()
         cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
         user = cursor.fetchone()
-
         if user:
-            # Генерируем код восстановления
             import random
             reset_code = ''.join(random.choices('0123456789', k=6))
-
-            # Время истечения - через 15 минут
             expires_at = datetime.now() + timedelta(minutes=15)
-
-            # Сохраняем код в базу (как текст, без форматирования)
             cursor.execute('UPDATE users SET reset_code = ?, reset_code_expires = ? WHERE id = ?',
                            (reset_code, expires_at.strftime('%Y-%m-%d %H:%M:%S'), user[0]))
             conn.commit()
-
-            # Отправляем код на почту
             subject = "Восстановление пароля - PriceMonitor"
             body = f"""
             <html>
-            <body style="font-family: Arial, sans-serif;">
+            <body>
                 <h2>Восстановление пароля</h2>
-                <p>Ваш код для сброса пароля: <strong style="font-size: 24px; color: #667eea;">{reset_code}</strong></p>
-                <p>Введите этот код на странице восстановления пароля.</p>
+                <p>Ваш код: <strong style="font-size: 24px;">{reset_code}</strong></p>
                 <p>Код действителен 15 минут.</p>
-                <hr>
-                <p>Если вы не запрашивали восстановление пароля, проигнорируйте это письмо.</p>
-                <p>С уважением,<br>Команда PriceMonitor</p>
             </body>
             </html>
             """
-
-            try:
-                msg = MIMEMultipart()
-                msg['From'] = SMTP_USER
-                msg['To'] = email
-                msg['Subject'] = subject
-                msg.attach(MIMEText(body, 'html', 'utf-8'))
-                server = smtplib.SMTP(SMTP_HOST, SMTP_PORT)
-                server.starttls()
-                server.login(SMTP_USER, SMTP_PASSWORD)
-                server.send_message(msg)
-                server.quit()
-
-                # Сохраняем email в сессию для следующего шага
-                session['reset_email'] = email
-
-                return render_template_string(RESET_CODE_TEMPLATE, email=email)
-
-            except Exception as e:
-                print(f"Ошибка отправки: {e}")
-                return 'Ошибка при отправке письма. Попробуйте позже.'
+            send_email(email, subject, body)
+            session['reset_email'] = email
+            return render_template_string(RESET_CODE_TEMPLATE, email=email)
         else:
             return 'Пользователь с таким email не найден'
-
     return render_template_string(FORGOT_TEMPLATE)
-
-
-# Шаблон для ввода кода
-RESET_CODE_TEMPLATE = '''
-<!DOCTYPE html>
-<html>
-<head><title>Введите код</title><meta charset="UTF-8"><style>
-    body{background:#0a0a0e;color:#fff;font-family:Arial;display:flex;justify-content:center;align-items:center;min-height:100vh;position:relative}
-    body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 50%,rgba(30,30,60,0.4) 0%,transparent 60%),radial-gradient(circle at 80% 80%,rgba(60,40,80,0.3) 0%,transparent 60%);z-index:-1}
-    .card{background:rgba(20,20,26,0.8);backdrop-filter:blur(10px);padding:40px;border-radius:16px;width:380px;border:1px solid rgba(42,42,53,0.5);text-align:center}
-    input{width:100%;padding:12px;margin:10px 0;background:rgba(15,15,18,0.8);border:1px solid #2a2a35;border-radius:8px;color:#fff;text-align:center;font-size:20px;letter-spacing:5px}
-    button{width:100%;padding:12px;background:#2a2a35;color:#fff;border:none;border-radius:8px;cursor:pointer;margin-top:10px}
-    a{color:#a0a0b0;text-decoration:none}
-    .header-buttons{text-align:left;margin-bottom:20px}
-    .btn-small{padding:5px 12px;font-size:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;color:#a0a0b0;text-decoration:none}
-    .btn-small:hover{background:#2a2a35;color:#fff}
-</style></head>
-<body>
-<div class="card">
-    <div class="header-buttons"><a href="/login" class="btn-small">← Назад</a></div>
-    <h2>Введите код</h2>
-    <p>Код отправлен на <strong>{{ email }}</strong></p>
-    <form method="post" action="/reset-password">
-        <input type="text" name="code" placeholder="Код из письма" maxlength="6" autocomplete="off">
-        <input type="password" name="new_password" placeholder="Новый пароль">
-        <input type="password" name="confirm_password" placeholder="Подтвердите пароль">
-        <button type="submit">Сбросить пароль</button>
-    </form>
-    <div style="margin-top:20px">
-        <a href="/forgot-password">Отправить код повторно</a>
-    </div>
-</div>
-</body>
-</html>
-'''
-
-FORGOT_TEMPLATE = '''
-<!DOCTYPE html>
-<html>
-<head><title>Восстановление пароля</title><meta charset="UTF-8"><style>
-    body{background:#0a0a0e;color:#fff;font-family:Arial;display:flex;justify-content:center;align-items:center;min-height:100vh;position:relative}
-    body::before{content:'';position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(circle at 20% 50%,rgba(30,30,60,0.4) 0%,transparent 60%),radial-gradient(circle at 80% 80%,rgba(60,40,80,0.3) 0%,transparent 60%);z-index:-1}
-    .card{background:rgba(20,20,26,0.8);backdrop-filter:blur(10px);padding:40px;border-radius:16px;width:350px;border:1px solid rgba(42,42,53,0.5)}
-    input{width:100%;padding:12px;margin:10px 0;background:rgba(15,15,18,0.8);border:1px solid #2a2a35;border-radius:8px;color:#fff}
-    button{width:100%;padding:12px;background:#2a2a35;color:#fff;border:none;border-radius:8px;cursor:pointer}
-    a{color:#a0a0b0;text-decoration:none}
-    .header-buttons{margin-bottom:20px}
-    .btn-small{padding:5px 12px;font-size:12px;background:#1a1a24;border:1px solid #2a2a35;border-radius:6px;color:#a0a0b0;text-decoration:none}
-    .btn-small:hover{background:#2a2a35;color:#fff}
-</style></head>
-<body>
-<div class="card">
-    <div class="header-buttons"><a href="/login" class="btn-small">← Назад</a></div>
-    <h2 style="text-align:center;margin-bottom:30px">Восстановление пароля</h2>
-    <form method="post">
-        <input type="email" name="email" placeholder="Email" required>
-        <button type="submit">Отправить код</button>
-    </form>
-    <div style="text-align:center;margin-top:20px"><a href="/login">Вернуться ко входу</a></div>
-</div>
-</body>
-</html>
-'''
-
 
 @app.route('/reset-password', methods=['POST'])
 def reset_password():
-    import hashlib  # <--- добавьте эту строку внутри функции
-
     code = request.form.get('code')
     new_password = request.form.get('new_password')
     confirm_password = request.form.get('confirm_password')
     email = session.get('reset_email')
-
     if not email:
         return redirect(url_for('forgot_password'))
-
     if new_password != confirm_password:
         return render_template_string(ERROR_TEMPLATE, error="Пароли не совпадают")
-
     if len(new_password) < 6:
         return render_template_string(ERROR_TEMPLATE, error="Пароль должен быть минимум 6 символов")
-
-    # Проверяем код
     conn = db.conn
     cursor = conn.cursor()
     cursor.execute('SELECT id, reset_code, reset_code_expires FROM users WHERE email = ?', (email,))
     user = cursor.fetchone()
-
     if not user:
         return render_template_string(ERROR_TEMPLATE, error="Пользователь не найден")
-
     if user[1] != code:
         return render_template_string(ERROR_TEMPLATE, error="Неверный код восстановления")
-
-    # Проверяем, не истёк ли код
-    if user[2]:
-        try:
-            expires = datetime.strptime(user[2], '%Y-%m-%d %H:%M:%S')
-            if datetime.now() > expires:
-                return render_template_string(ERROR_TEMPLATE, error="Код истёк. Запросите новый")
-        except:
-            pass
-
-    # Обновляем пароль
     salt = secrets.token_hex(16)
     password_hash = hashlib.pbkdf2_hmac('sha256', new_password.encode(), salt.encode(), 100000).hex()
-
-    cursor.execute(
-        'UPDATE users SET password_hash = ?, salt = ?, reset_code = NULL, reset_code_expires = NULL WHERE id = ?',
-        (password_hash, salt, user[0]))
+    cursor.execute('UPDATE users SET password_hash = ?, salt = ?, reset_code = NULL, reset_code_expires = NULL WHERE id = ?',
+                   (password_hash, salt, user[0]))
     conn.commit()
-
     session.pop('reset_email', None)
-
     return '''
     <!DOCTYPE html>
     <html>
@@ -1910,27 +1748,6 @@ def reset_password():
     </html>
     '''
 
-
-ERROR_TEMPLATE = '''
-<!DOCTYPE html>
-<html>
-<head><title>Ошибка</title><meta charset="UTF-8"><style>
-    body{background:#0a0a0e;color:#fff;font-family:Arial;display:flex;justify-content:center;align-items:center;min-height:100vh}
-    .card{background:rgba(20,20,26,0.8);backdrop-filter:blur(10px);padding:40px;border-radius:16px;width:350px;text-align:center}
-    .error{color:#f0a0a0;margin-bottom:20px}
-    .btn{display:inline-block;padding:12px 24px;background:#2a2a35;color:#fff;text-decoration:none;border-radius:8px;margin-top:20px}
-</style></head>
-<body>
-<div class="card">
-    <h2>❌ Ошибка</h2>
-    <p class="error">{{ error }}</p>
-    <a href="/forgot-password" class="btn">Попробовать снова</a>
-</div>
-</body>
-</html>
-'''
-
 if __name__ == '__main__':
-    import os
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=False, host='0.0.0.0', port=port)
